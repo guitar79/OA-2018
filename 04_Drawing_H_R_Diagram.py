@@ -122,3 +122,14 @@ plot_lum_class(b,'yellow', 'I: supergiants')
 ax.tick_params(axis='both', labelsize=14)
 legend = ax.legend(scatterpoints=1,markerscale = 6, shadow=True)
 frame = legend.get_frame()
+
+'''
+fig.savefig('H-R Diagram (Hipparcos catalog).pdf', dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', papertype=None, format=None,
+        transparent=False, bbox_inches=None, pad_inches=0.1,
+        frameon=None, metadata=None)
+'''
+fig.savefig('H-R Diagram (Hipparcos catalog).png', dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', papertype=None, format=None,
+        transparent=False, bbox_inches=None, pad_inches=0.1,
+        frameon=None, metadata=None)
