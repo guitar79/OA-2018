@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import sys
 
 #Now I will read the file creating a Pandas DataFrame:
 filename = 'I_239_selection.tsv'
