@@ -1,0 +1,34 @@
+\chapter{컴퓨터 이용}
+
+There are hundreds of computer tools for doing numerical calculations. This class is going to focus on two types of tools; scripting languages (here we are using Python or Fortran), and spreadsheets.
+
+Scripts are more powerful than spreadsheets, but also more abstract, so I often find it useful to make a prototype of a model in a spreadsheet, where all the numbers can be seen at once and easily plotted, which I then encode into a programming script using the results of the spreadsheet as a check to find bugs in the code. If I get the same answer both ways I have much more faith that I haven't left a bug somewhere. Most of the models you will create in this class will be possible to do using only spreadsheets, but one problem (a shallow-water circulation code) is too complex to do in a spreadsheet. Ultimately you will only get credit for the Python scripts, which you will submit for automated checking and clarity review by your peer learners. It is entirely optional and up to you whether you want to construct spreadsheets in addition to the scripts. For me, I generally would, especially if I'm not sure how I want the model to work yet. In this class, the instructions are pretty explicit, so jumping straight to code is an option.
+
+A spreadsheet has a 2-d lattice of cells, which can hold numbers or formulas that may refer to numbers in other cells, or results calculated in other cells. Programming languages don’t have this enforced layout (although there can be arrays of variables), but rather step forward in an execution sequence.
+
+The advantage of a spreadsheet is that the numbers are laid out in an easy to look at way, making it easier to visualize the calculations being done, and easier to fix things that don’t work right.
+
+The limitation of spreadsheets is that it is difficult to set up repeated calculations within a given cell; a sequence of time or iterative steps usually has to be saved in different cells. As you take more and more steps, the size of the spreadsheet gets larger and larger. A script in Python or Fortran can change the number of steps, or the number of grid points, without making the code longer (it will just take longer to run).
+
+This class is set up to accept programming assignments in either of two languages, Python and Fortran. Fortran is a very old language which has been updated numerous times. There is a joke that there is no telling what the scientific number-crunching language of the future will look like, but it will certainly be called Fortran. Fortran code is compiled, which means pre-translated from Fortran code text into machine-executable binary code before it is run. The compilers for Fortran have been optimized for speed, so if you have a compute job that will take hours or weeks of CPU time, Fortran is your choice.
+
+Python is newer language, which brings many advantages. Stylistically, Python seems smarter and more evolved. The indenting of a line in Python carries information about the program structure, like what lines are within a loop. This ensures that your code is also readable to your eye. Substantively, Python follows the lead of other modern languages in that people contribute functionality in the form of add-in packages. We will use a numerical package called numpy (pronounced num-pie) to add array functionality to Python, which Fortran comes with built-in, and another called matplotlib, for plotting, which we will not try to replicate in Fortran. Most climate codes that run in Fortran are "visualized" using post-processing software, rather than having the GCM make plots itself as it goes. The disadvantage of Python is that it is computationally much slower. For many problems, such as most of the models you'll be creating here, the problem is small enough that it doesn't matter.
+
+If you are only going to learn one language, and you're not applying for a job working on climate models, Python is probably the better choice. Python is open-sourced and free, and there are free versions of Fortran available (such as gfortran or g77). Coding is very similar in any of these languages, in that you build the code, try to run it, figure out why it didn’t run, run it, then figure out why it gave you the wrong answer (a process called debugging).
+
+In my own work, I will often first create a spreadsheet version of the problem, or maybe a small piece of it, and then I will write the code, using the spreadsheet to help compose and debug the code
+
+
+
+\section{Spread Sheet}
+
+\subsection{Spread Sheet basic}\index{Spread Sheet basic}
+
+To write a formula in a cell that refers to another cell, begin the entry with an equals sign “=”, then get values from other cells by clicking on them, combining them using standard math symbols to add them, etc. There are built-in functions to calculate many things in spreadsheets, and graphing capabilities, so you can see visually how your numbers are evolving.
+
+One really useful but not obvious trick to coding spreadsheets is relative versus absolute addressing of cells, when you’re copying a formula from one cell to another. If the formula refers to a cell, say A1 (the cell in the upper left corner of the sheet), and you copy the formula down to the cell below its original location, the copied formula will refer to cell A2, the one below the original referent cell. If you copied it one to the right, you would get cell B1. This behavior is useful in some situations, but in others you might want the new formula to also refer to A1, wherever you copy it to. The way to make this happen is to insert “\$” characters before the A or the 1 index of the reference cell. If it is referenced absolutely, in this way, the indices don’t change when you copy and paste them.
+
+Another useful technique is to use a few rows of cells near the top of the sheet to hold constants that you will be using in the calculations, so that you can change a value of one of the constants, and the whole calculation will re-do itself. For a time-stepping calculation, for example, if you have a cell up top labeled “time step (years)”, and you put your number next to that label, you can change the time step later by changing that value.
+
+Finally, pay close attention to units, and label them clearly, to avoid endless debugging frustration. I often use two cells for each labeled constant or column heading, one with the variable name, and another just below it for the units.
+

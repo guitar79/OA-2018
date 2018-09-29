@@ -1,0 +1,375 @@
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{대기 역학}
+
+%----------------------------------------------------------------------------------------
+%	CHAPTER
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_2.pdf} % Chapter heading image
+
+\chapter{대기 역학}\index{대기 역학}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{좌표계}
+
+\subsection{좌표계1}
+
+관성계 : 절대 좌표계 $ (x,~y,~z)$ \\
+비관성계 : 회전좌표계 $ (x^{\prime},~y^{\prime},~z^{\prime})$ 
+극좌표 $ (r,~\theta,~z)$\\
+\\
+$ (x,~y,~z) 	\rightarrow (r,~\theta,~z)$ 에서 \\
+수평 방향은 정역학 평형 상태에 있으므로, \\	
+
+$ (x, y) 	\rightarrow (r, \theta)$\\
+
+$ \mathbf{F} = F_{x} \mathbf{\hat{i}}  + F_{y} \mathbf{\hat{j}} $ 에서 
+$ F_{x} = m \dfrac{d^{2}x}{dt^{2}}$, 
+$ F_{y} = m \dfrac{d^{2}y}{dt^{2}}$ 라고 할 수 있다.  \\
+
+$ (x, y) = (r \cos \theta, r \sin \theta)$ 에서 \\
+$ F_{r} = F_{x} \cos \theta + F_{y} \sin \theta $, 
+$ F_{\theta} = F_{y} \cos \theta - F_{x} \cos \theta $ 로 나타낼 수 있다. \\
+
+$ x = r \cos \theta $를 미분하면, \\
+$\dfrac{dx}{dt} = \cos \theta \dfrac{dr}{dt} - r \sin \theta \dfrac{d\theta}{dt}$ 이고, \\
+이를 다시 미분하면, 
+$\dfrac{d^{2}x}{dt^{2}} = \cos \theta \dfrac{d^{2}r}{dt^{2}} - \sin \theta \dfrac{dr}{dt} - \sin \theta \dfrac{dr}{dt} \dfrac{d\theta}{dt} -r \cos \theta \dfrac{d^{2}\theta}{dt^{2}}$\\
+같은 방법으로 $ y = r \sin \theta $ 를 미분하면 \\
+$\dfrac{dy}{dt} = \sin \theta \dfrac{dr}{dt} + r \cos \theta \dfrac{d\theta}{dt}$ 이고,\\
+이를 다시 미분하면
+$\dfrac{d^{2}t}{dt^{2}} = \sin \theta \dfrac{d^{2}r}{dt^{2}} + \cos \theta \dfrac{dr}{dt} + \cos \theta \dfrac{dr}{dt} \dfrac{d\theta}{dt} -r \sin \theta \dfrac{d^{2}\theta}{dt^{2}}$이다. \\
+
+
+
+$ F_{r} = F_{x} \cos \theta + F_{y} \sin \theta 
+= m \left ( \dfrac{d^{2}x}{dt^{2}} \cos \theta + \dfrac{d^{2}y}{dt^{2}} \sin \theta \right) $\\
+
+$ F_{\theta} = F_{y} \cos \theta - F_{x} \cos \theta 
+= m \left ( \dfrac{d^{2}y}{dt^{2}} \cos \theta - \dfrac{d^{2}x}{dt^{2}} \cos \theta \right) $\\
+
+
+정리하면, \\
+
+$ F_{r} = m \left[ \dfrac{d^{2}r}{dt^{2}} - r \left( {\dfrac{d \theta}{dt}} \right)^{2} \right] $에서, 
+$ -r \left( {\dfrac{d \theta}{dt}} \right)^{2} \rightarrow $ Centrifugal force \\
+
+$ F_{\theta} = m \left[ r \dfrac{d^{2}\theta}{dt^{2}} + 2 \dfrac{dr}{dt} \dfrac{d\theta}{dt}  \right] $에서, 
+$ 2 \dfrac{dr}{dt} \dfrac{d\theta}{dt} \rightarrow $ Coriolis force \\
+
+
+\subsection{좌표계2}
+
+$ (x,~y) 	\rightarrow (x^{\prime},~y^{\prime})$\\
+
+$ \mathbf {F} = F_{x} \mathbf{\hat{i}} + F_{y} \mathbf{\hat{j}} $에서 
+$ F_{x} = m \dfrac{d^{2}x}{dt^{2}}$, 
+$ F_{y} = m \dfrac{d^{2}y}{dt^{2}}$ 라고 할 수 있다.\\
+
+$ x^{\prime} = x \cos \omega t + y \sin \omega t$, 
+$ y^{\prime} = -x \sin \omega t + y \cos \omega t$\\
+
+$ \mathbf {F} = F_{x^{\prime}} \mathbf {\hat{i}}  + F_{y^{\prime}} \mathbf {\hat{j}} $\\
+
+$ F_{x^{\prime}} = F_{x} \cos \omega t + F_{y} \sin \omega t
+= m \left ( \dfrac{d^{2}x}{dt^{2}} \cos \omega t + \dfrac{d^{2}y}{dt^{2}} \sin \omega t \right) $\\
+
+$ F_{y^{\prime}} = -F_{x} \sin \omega t + F_{y} \cos \omega t
+= m \left ( - \dfrac{d^{2}x}{dt^{2}} \sin \Omega t + \dfrac{d^{2}y}{dt^{2}} \cos \omega t \right) $\\
+
+정리하면,
+
+
+$ F_{x^{\prime}} = m \left( \dfrac{d^{2}x}{dt^{2}}F_{x} - 2 \omega  \dfrac{dy}{dt} - 2 \omega^{2} x^{\prime}  \right) $\\
+
+$ F_{y^{\prime}} = m \left( \dfrac{d^{2}y}{dt^{2}}F_{x} + 2 \omega  \dfrac{dx}{dt} - 2 \omega^{2} y^{\prime}  \right) $\\
+
+
+
+수정 요함...
+
+$ x^{\prime} = x \cos \Omega t + y \sin \Omega t$ 을 미분하면,\\
+
+$\dfrac{dx^{\prime}}{dt} = \dfrac{dx}{dt} \cos \Omega t - x \sin \Omega t +  \dfrac{dy}{dt} \sin \Omega t + y \cos \Omega t $ \\
+
+$\dfrac{d^{2}x}{dt^{2}} = \cos \theta \dfrac{d^{2}r}{dt^{2}} - \sin \theta \dfrac{dr}{dt} - \sin \theta \dfrac{dr}{dt} \dfrac{d\theta}{dt} -r \cos \theta \dfrac{d^{2}\theta}{dt^{2}}$\\
+\\
+$ y = r \sin \theta $ \\
+
+$\dfrac{dy}{dt} = \sin \theta \dfrac{dr}{dt} + r \cos \theta \dfrac{d\theta}{dt}$ \\
+
+$\dfrac{d^{2}t}{dt^{2}} = \sin \theta \dfrac{d^{2}r}{dt^{2}} + \cos \theta \dfrac{dr}{dt} + \cos \theta \dfrac{dr}{dt} \dfrac{d\theta}{dt} -r \sin \theta \dfrac{d^{2}\theta}{dt^{2}}$\\
+\\
+
+
+
+여기까지 수정 요함...
+
+
+\subsection{각운동량 보존}
+
+$\dfrac{d \theta}{dt} = \Omega$ \\
+
+$ r\dfrac{d \theta}{dt} = r \Omega = u_{\theta} $\\
+
+$\dfrac{dr}{dt} = v_{r}$\\
+
+$\dfrac{d}{dt} r^{2}\Omega = 2 r \dfrac{dr}{dt} \Omega + r^{2} \dfrac{d\Omega}{dt} 
+= r \left( r \dfrac{d\Omega}{dt} +2 \dfrac{dr}{dt} \Omega \right) $\\
+
+$ r F_{\theta} = m \dfrac{d}{dt} \left(r^{2} \Omega \right) $\\
+
+$ r^{2} \Omega = const$\\
+
+$ r \left( r \Omega \right) = r u_{\theta} = const $ \\
+
+
+$ R_{1} V_{1} = R_{2} V_{2}$\\
+\\
+
+
+\subsection{Pressure gradient force}
+
+$ dV = dx \cdot dy \cdot dz $\\
+
+$x$ 방향 \\
+
+$ F_{x} = P \cdot \Delta y \cdot \Delta z - \left( P + \Delta P \right) \Delta y \cdot \Delta z$\\
+
+$ F_{x} = - \Delta P \cdot \Delta y \cdot \Delta z $\\
+
+$ \dfrac { \Delta y}{\Delta x } = \dfrac {f\left(x + \Delta x \right) - f\left(x \right)}{ \Delta x}$\\
+
+$f^{\prime} \left(x \right) = lim \dfrac { \Delta y}{\Delta x } 
+= \dfrac {f\left(x + \Delta x \right) - f\left(x \right)}{ \Delta x}$\\
+
+$z = f \left( x, y \right) $ \\
+$y = b \rightarrow $ 고정 \\
+
+
+$\dfrac{\partial z}{\partial x} = \displaystyle \lim_{\Delta x \rightarrow 0} \dfrac { \Delta z}{\Delta x } 
+= \dfrac {f\left(x + \Delta x, b \right) - f\left(x, b \right)}{ \Delta x}$\\
+
+$\dfrac{\partial z}{\partial y} = \displaystyle \lim_{\Delta y \rightarrow 0} \dfrac { \Delta z}{\Delta y } 
+= \dfrac {f\left(y + \Delta y, b \right) - f\left(y, b \right)}{ \Delta y}$\\
+
+$ \Delta z = \dfrac{\partial z}{\partial x} \Delta x + \dfrac{\partial z}{\partial y} \Delta y $\\
+
+$ dz = \dfrac{\partial z}{\partial x} dx + \dfrac{\partial z}{\partial y} dy $\\
+
+
+$ \Delta T = \dfrac{\partial T}{\partial t} \Delta t 
++ \dfrac{\partial T}{\partial x} \Delta x 
++ \dfrac{\partial T}{\partial y} \Delta y 
++ \dfrac{\partial T}{\partial z} \Delta z $\\
+
+$ F_{x} = - \Delta P \cdot \Delta y \cdot \Delta z 
+= \dfrac{\partial P}{\partial x} \cdot \Delta x \cdot \Delta y \cdot \Delta z $\\
+
+$ F_{y} = - \Delta P \cdot \Delta z \cdot \Delta x 
+= \dfrac{\partial P}{\partial y} \cdot \Delta x \cdot \Delta y \cdot \Delta z $\\
+
+$ F_{z} = - \Delta P \cdot \Delta x \cdot \Delta y 
+= \dfrac{\partial P}{\partial z} \cdot \Delta x \cdot \Delta y \cdot \Delta z $\\
+
+$ \rho = \dfrac {m}{\Delta x \cdot \Delta y \cdot \Delta z} $ \\
+
+$ \dfrac {F_{x}}{m} = - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} $ \\
+
+$ \dfrac {F}{m} = - \dfrac{1}{\rho} \left( \dfrac{\partial P}{\partial x} i + \dfrac{\partial P}{\partial y} j + \dfrac{\partial P}{\partial z} k \right) 
+= - \dfrac{1}{\rho} \nabla P$ \\
+
+
+\subsection{Gravity}\
+
+\subsection{회전계에서의 운동 방정식}
+
+
+$ \Delta T = \dfrac{\partial T}{\partial t} \Delta t 
++ \dfrac{\partial T}{\partial x} \Delta x 
++ \dfrac{\partial T}{\partial y} \Delta y 
++ \dfrac{\partial T}{\partial z} \Delta z $\\
+
+이 식을 $ \Delta T $로 나누고 0으로 극한을 취하면,\\
+
+$ \displaystyle \lim_{\Delta t \rightarrow 0} \dfrac{\Delta T}{\Delta t} 
+= \dfrac{DT}{Dt} = \dfrac{\partial T}{\partial t} 
++ \dfrac{\partial T}{\partial x} \dfrac{Dx}{Dt}
++ \dfrac{\partial T}{\partial y} \dfrac{Dy}{Dt}
++ \dfrac{\partial T}{\partial z} \dfrac{Dz}{Dt} $\\
+
+$\dfrac{Dx}{Dt} \equiv u$, 
+$\dfrac{Dy}{Dt} \equiv v$, 
+$\dfrac{Dz}{Dt} \equiv w$, 
+ 라고 정의하면\\
+
+$ \dfrac{DT}{Dt} = \dfrac{\partial T}{\partial t} 
++ \left( u \dfrac{\partial T}{\partial x}
++ v \dfrac{\partial T}{\partial y}
++ w \dfrac{\partial T}{\partial z} \right)
+= \dfrac{\partial T}{\partial t} + U \cdot \nabla T $\\
+
+여기에서 $ U = iu + jv + kw $ 3차원 속도 벡터 이다.
+
+회전계에서의 운동방정식을 유도하면,
+
+$ \dfrac{DU}{Dt} = -2 \Omega \times U - \dfrac{1}{\rho} \nabla p + g + F_{r} $\\
+
+와 같이 나타낼 수 있다.
+
+
+
+\subsection{직각 카테시안 좌표계에서의 운동 방정식}
+
+$ \dfrac{DU}{Dt} = -2 \Omega \times U - \dfrac{1}{\rho} \nabla p + g + F_{r} $ 에서 \\
+
+먼저 전향력 성분을 나누어 보면, 
+
+$ \Omega_{x} = 0$,
+$ \Omega_{y} = \Omega \cos \phi$, 
+$ \Omega_{z} = \Omega \sin \phi$ 이다.\\
+
+$ -2 \Omega \times U  
+= -2 \left| \begin{array}{ccc}
+i & j & k \\
+0 & \Omega \cos \phi & \Omega \sin \phi \\
+u & v & w \end{array} \right| \\
+
+= -2 \left( 2 \Omega w \cos \phi -2 \Omega v \sin \phi \right) \mathbf{i}
+- 2 \Omega u \sin \phi \mathbf{j}
++ 2 \Omega u \cos \phi \mathbf{k}$\\
+로 나타낼 수 있다. \\
+
+그리고 기압경도력을 나누어 보면, \\
+
+$ \nabla p = \mathbf{i} \dfrac{\partial P}{\partial x} 
++ \mathbf{j} \dfrac{\partial P}{\partial y}
++ \mathbf{k} \dfrac{\partial P}{\partial z}$\\
+
+중력은 
+$ \mathbf{g} = -g \mathbf{k} $\\
+
+마찰은 
+$ F_{r} = \mathbf{i} F_{x}
++ \mathbf{j} F_{y}
++ \mathbf{k} F_{z}$\\
+
+각 성분별로 운동방정식을 나타내면 \\
+
+$ \dfrac{Du}{Dt}
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
++ 2 \Omega v \sin \phi - 2 \Omega w \cos \phi 
++ F_{x} $\\
+
+$ \dfrac{Dv}{Dt}
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
+- 2 \Omega u \sin \phi
++ F_{y} $\\
+
+$ \dfrac{Dw}{Dt}
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
++ 2 \Omega u \cos \phi 
++ F_{z}$\\
+
+$x$ 성분에서 연직 전향력은 수평 전향력에 비해 매우 작은 값이므로, $- 2 \Omega w \cos \phi $ 항을 무시할 수 있다. \\
+$z$ 성분의 전향력 $ 2 \Omega u \cos \phi $ 은 중력 $g$에 비해 매우 작으므로 무시할 수 있다. \\
+더구나 $ \dfrac{Dw}{Dt}$의 크기는 더 작기 때문에 $ 2 \Omega \sin \phi $를 $f$로 두면 다음과 같이 간단히 할 수 있다.
+
+$ \dfrac{Du}{Dt}
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
++ 2 \Omega v \sin \phi 
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
++ f v $\\
+
+$ \dfrac{Dv}{Dt}
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
+- 2 \Omega u \sin \phi
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x}
+- f u $\\
+
+$ 0
+= - \dfrac{1}{\rho} \dfrac{\partial P}{\partial x} 
+- g $\\ 
+
+
+\subsection{자연 좌표계}
+
+자연 좌표계 $ (s,~n,~z)$ \\
+
+$ t $ : 유체가 움직이는 방향에 평행인 방향\\
+$ n $ : $ t $에 대하여 수직인 벡터이고 유체가 움직이는 방향의 왼쪽으로 향하는 방향이 + 방향임\\
+$ k $ : 연직 방향\\
+
+$\mathbf{V} = V \mathbf{t}$, $\mathbf{V} = \dfrac{Ds}{Dt}$ \\
+가속도  $ \dfrac{D\mathbf{V}}{Dt} = \mathbf{t} \dfrac{DV}{Dt} + V \dfrac{D \mathbf{t}}{Dt}$$
+
+
+
+\subsection{연습 문제}
+
+1. (1) \\
+각운동량 보존법칙은 
+$ R_{1}~ V_{1} = R_{2}~ V_{2}$ \\
+$ V_{1} = R_{1}~ \Omega_{1}$,
+$ V_{2} = R_{2}~ \Omega_{2}$ 이므로
+$ {R_{1}}^{2}~ \Omega_{1} = {R_{2}}^{2}~ \Omega_{2}$ \\
+$ {1}^2 \times 2 = {0.5}^2 \times \Omega_{2}$ 에서 
+$ \Omega_{2} = 8 \left( \rm rad ~ s^{-1} \right) $\\
+회전 선속도는 
+$ V_{2} = 0.5 \times 8 = 4 \left( \rm m ~ s^{-1} \right) $\\
+각운동량은
+$ {L}_{2} = R_{2} \times m V_{2} 
+= 0.5 \cdot 1 \cdot 4 
+= 2 \left( \rm kg ~ m ~ s^{-1} \right)$\\
+
+1. (2) \\
+구심가속력은
+$ - m ~ {R}_{2} ~ {{\Omega}_{2}^{2}
+= - 1 \cdot 0.5 \cdot 8
+= - 4 \left( \rm kg ~ m ~ s^{-1} \right)$\\
+
+2.  \\
+
+북위 $37.5^{\circ}$의 자전 선속도는
+$R_{E} \cdot \cos \phi \Omega
+= 6380000 \cdot 0.7934 \cdot 7.272 \times 10^{-5}
+= 368.11 \left( \rm m ~ s^{-1} \right)$\\
+절대 좌표계에서 이 바람을 관측한다면 자전 선속도와 바람의 방향이 같으므로\\
+$368.11 + 5 = 373.11 \left( \rm m ~ s^{-1} \right)$ 이다.\\
+
+3.  \\
+
+전향력은 \\
+$ 2 m v \Omega \sin \phi
+= \  2 \cdot 65 \cdot 1000000 \div 3600 \cdot 7.272 \cdot 0.5
+= 131300 \left( \rm kg~m ~ s^{-2} = N \right) $이다.\\
+
+4.  \\
+
+지균풍의 풍속은 \\
+$ f v_{g} = - {\rho} \dfrac{\partial P}{\partial n}\\
+
+v_{g} = - \dfrac{1}{f} \cdot \dfrac{1}{\rho} \cdot \dfrac{\partial P}{\partial n}
+= - \dfrac{1}{2 \Omega \sin \phi } \cdot \dfrac{1}{\rho} \dfrac{\partial P}{\partial n} \\
+= - \dfrac{1}{\rho} \cdot \dfrac{1}{2 \cdot 7.272 \left( \rm s^{-1} \right) \cdot 0.5 } \cdot \dfrac{200 \left( \rm kg~m~s^{-2} m^{-2} \right)} {100000 \left( \rm m \right)} \\
+= - \dfrac{1}{\rho} \cdot 27.50 \left( \rm kg~m^{-2}~ s^{-1} \right) $이다. 공기의 밀도를 $ 1\rm kg~m^{-3}$이라고 가정하면, \\
+$v_{g} = - 27.50 \left( \rm m~ s^{-1} \right) $이다.\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+

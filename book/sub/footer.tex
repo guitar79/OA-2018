@@ -1,0 +1,69 @@
+
+\part{부록}
+
+
+%----------------------------------------------------------------------------------------
+%	INDEX
+%----------------------------------------------------------------------------------------
+
+\cleardoublepage
+\phantomsection
+\setlength{\columnsep}{0.75cm}
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{Index}}
+\printindex
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------
+%     List of Figures/Tables (자동 작성됨)
+%----------------------------------------------
+\cleardoublepage
+\clearpage
+\listoftables
+% 표 목록과 캡션을 출력한다. 만약 논문에 표가 없다면 이 위 줄의 맨 앞에 
+% `%' 기호를 넣어서 주석 처리한다.
+
+\cleardoublepage
+\clearpage
+\listoffigures
+% 그림 목록과 캡션을 출력한다. 만약 논문에 그림이 없다면 이 위 줄의 맨 앞에 
+% `%' 기호를 넣어서 주석 처리한다.
+
+\cleardoublepage
+\clearpage
+%\listofequations
+% 그림 목록과 캡션을 출력한다. 만약 논문에 그림이 없다면 이 위 줄의 맨 앞에 
+% `%' 기호를 넣어서 주석 처리한다.
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{Bibliography}}
+\section*{Books}
+\addcontentsline{toc}{section}{Books}
+\printbibliography[heading=bibempty,type=book]
+\section*{Articles}
+\addcontentsline{toc}{section}{Articles}
+\printbibliography[heading=bibempty,type=article]
+
+
+%-----------------------------------------------------
+%   감사의 글
+%-----------------------------------------------------
+\begin{acknowledgements}
+\addcontentsline{toc}{section}{감사의 글}  %%% TOC에 표시
+정말 감사합니다.
+\end{acknowledgements}
+
+%-----------------------------------------------------
+%   약력
+%-----------------------------------------------------
+\begin{career}
+\addcontentsline{toc}{section}{경력}  %%% TOC에 표시
+\begin{itemize}
+\item{.}
+\end{itemize}
+\end{career}

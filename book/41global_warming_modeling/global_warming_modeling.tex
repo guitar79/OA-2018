@@ -1,0 +1,800 @@
+\section{지구 온난화 모델링}
+
+\subsection{Time-Stepping Naked Planet Model}\index{Time-Stepping Naked Planet Model}
+
+\subsubsection{How the Model Works}\index{}
+
+So the naked planet model is an energy balance model. We have energy coming in at some rate, and energy flowing out at a rate, which depends on the temperature of the planet. So the temperature and the heat content are related to each other by means of the heat capacity. Which is how many jewels it takes to raise the temperature of one square meter of the surface by one degree kelvin. And that number depends on the water depth, because the water is the sort of heat sink. So if we change this value to smaller value, you'll see the heat capacity change. Because I'm calculating the heat capacity as a function of the water depth. 
+0:45
+The incoming energy is from sunlight, and the albedo reflective energy is lost sort of off the top. And then outgoing is epsilon sigma T to the fourth. So you can calculate, at any given temperature, what the heat flux out will be. 
+1:13
+The way this works is that you want to keep track of the heat content of the planet. So you start out at a temperature of zero, the heat content will be zero. But then you have heat coming in and heat, not so much heat going out. And so you need to calculate how many joules of energy per square meter there are in that column, after a timestep of a certain duration. And once you have the heat content, you can calculate what the temperature is each timestep. You have to be careful about the length of the timestep. Because if you take a timestep that's too short for the water depth, it will become numerically unstable and blow up, very exciting. So what we do here is make the timestep shorter, let's try 50 years. 
+2:09
+That's better but, it's still looking a little jittery there. So, right, right, ten years and oh, you can't see the time scale is changing there so. If we change the timestep, we get the same number of time steps. But, each one goes longer so the number of years is longer. So now if we look at the Python script for this, we see it's very short. We define parameters up top. In both cases, it's real important to keep close track of the units. So I just have comments here for units. In the spreadsheet I have actual cells that I use to put units in just to keep it. It's much easier to debug if you can kind of keep it straight. And then, here is a loop that goes through the timesteps. And here are some plotting lines that use this Python library matplotlib to make the plot that we see. 
+
+
+\subsubsection{방정식}\index{}
+
+%The background for this material can be found in Sections 2 and 3 of Part I of this class. 
+%Short version: Joules are units of energy; Watts are energy flow (J/s). The temperature of a planet is determined by balancing energy fluxes into and out of a planet. 
+
+어느 행성에 단위 시간 당 입사되는 태양복사에너지($E_{in}$)\는 
+\begin{equation}
+{\rm E_{in} ~ = ~ \frac{L (1- \alpha)} {4}}
+\label{eq:001}
+\end{equation}
+\와 같이 나타낼 수 있는데 여기서 ${\alpha}$\는 행성의 알베도이다. 그리고, 행성이 방출하는 복사에너지($E_{out}$)\는 
+\begin{equation}
+{\rm E_{out} ~ = ~ {\epsilon} ~ {\sigma} ~ T^4}
+\label{eq:002}
+\end{equation}
+\로 나타낼 수 있는데 여기서 ${\epsilon}$\은 행성의 흑체율이고, ${\sigma}$\는 슈테판-볼쯔만 상수로 그 값은
+
+\begin{equation}%[caption={code for map}, label=lst:Pythoncode]
+{\rm \sigma ~ =~ \frac{2\pi^5~k^4}{15~c^3~h^3}~=~ 5.670400 \times 10^{-8}~ (J ~s^{-1}~m^{-2}~K^{-4})}
+\end{equation}
+이다. 
+
+%The goal is to numerically simulate how the planetary temperature of a naked planet would change through time as it approaches equilibrium (the state at which it stops changing, which we calculated before). The planet starts with some initial temperature. The “heat capacity” (units of Joules / m2 K) of the planet is set by a layer of water which absorbs heat and changes its temperature. If the layer is very thick, it takes a lot more heat (Joules) to change the temperature. The differential equation you are going to solve is
+
+행성의 표면 온도가 어떻게 평형을 이루는지 계산해 보자.
+열용량(heat capacity)의 단위는 ${\rm J~ m^{-2}~K^{-1}$이고, 해양이 열을 흡수하여 행성의 온도가 변하는 것으로 가정하며 해양이 깊으면 열용량도 크다고 볼 수 있다.
+
+\begin{equation}%[caption={code for map}, label=lst:Pythoncode]
+{\rm \frac {dHeatContent} {dt} ~ = ~ \frac{ L~ (1 - \alpha )} {4} ~ - ~ \epsilon ~ \sigma ~ T^4}
+\end{equation}
+
+
+where the heat content is related to the temperature by the heat capacity.
+
+\begin{equation}%[caption={code for map}, label=lst:Pythoncode]
+{\rm T[K] ~=~ \frac{Heat~Content ~[J~m^{-2}]} {Heat~Capacity~[J~m^{-2}~K^{-1}]}}
+\end{equation}
+
+
+The numerical method is to take time steps, extrapolating the heat content from one step to the next using the incoming and outgoing heat fluxes, same as you would balance a bank account by adding all the income and subtracting all the expenditures over some time interval like a month. The heat content "jumps" from the value at the beginning of the time step, to the value at the end, by following the equation
+
+\begin{equation}%[caption={code for map}, label=lst:Pythoncode]
+{\rm HeatContent(t+1) ~=~ HeatContent(t) ~+~ \frac {dHeatContent} {dt} ~ TimeStep}
+\end{equation}
+
+
+This scheme only works if the time step is short enough that nothing too huge happens through the course of the time step.
+
+Set the model up with the following constants:
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+timeStep = 100           # years
+waterDepth = 4000        # meters
+L = 1350                 # Watts/m2
+albedo = 0.3
+epsilon = 1
+sigma = 5.67E-8          # W/m2 K4
+
+\end{lstlisting}
+
+
+
+\begin{enumerate}
+	\item Construct a time column, with the first time point being 0 and the rest of them going up by an increment, the time step, say 5 years. Make the time step a labeled number in a cell so you can easily change it later. 
+	\item (The second time step value) = (the first value) + (the time step), and the third relative to the second and so on. If the amount of time per time step is in cell A1 for example, the formula to calculate step 2 from step 1 should point to A1 in an absolute way, using {\$A\$1}, so when you copy the formula downwards it keeps pointing to {\$A\$1} (as opposed to the previous time step pointer, without dollar signs, which shifts when you copy the cell downward. This saves retyping in formulas all the way down.
+	\item Construct a column for the planetary temperature at each time step. Set the initial temperature (at time 0) to be some “initial condition” value (0 works).
+	\item The heat capacity of the surface planet depends on the water thickness. Using the fact that 1 gram of water warms by 1 K with a calorie of heat, and the density of water, to calculate how many Joules of energy it takes to raise the temperature of 1 m2 of the surface, given some water depth in meters. Make the water depth a separate cell so you dial it up and down later.
+	\item Create a column for the heat content of the surface layer at each time step. For the initial time, calculate the heat content from the temperature.
+	\item Create a column for the incoming and outgoing heat fluxes at each time step. Base the incoming heat flux on the parameters solar constant (L), and albedo. The outgoing heat flux is a function of the temperature according to the Stefan-Boltzmann equation.
+	\item Create yet another column where you combine the incoming and outgoing heat fluxes, and convert them from W/m2 to J/m2 timestep.
+	\item Create a formula for the heat content at the second time point (the row below the first one), equaling the last heat content plus what came in and out in the previous timestep.
+	\item Calculate the temperature at the second time step, from the heat content.
+	\item Copy the formulas down to fill in the rest of the values at the second time step.
+	\item Copy the second time step values down by 10 or 20 rows to create multiple time steps.
+	\item Plot temperature versus time.
+	\item Adjust the time step so that the temperature evolves smoothly (no numerical explosions) to an equilibrium value.
+\end{enumerate}
+
+이와 같은 방법으로 스프레드 시트를 이용하여 계산한 결과로 챠트를 그린 것이 \ref{fig:nakedchart01} 이다. 
+\begin{figure}[b!]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Pictures/naked__chart01}
+	\caption{spread sheet를 이용하여 그린 챠트}
+	\label{fig:nakedchart01}
+\end{figure}
+
+\newpage
+
+\subsubsection{Python 이용}\index{}
+\begin{enumerate}
+	\item You’ll need to have numpy and matplotlib modules installed in your python programming environment, and in the first lines of your script import both of them.
+
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+import numpy
+import matplotlib.pyplot
+\end{lstlisting}
+
+	\item Define variables for the time step, the water depth, the heat capacity of the surface (units of J/m2 K), the solar constant, albedo, epsilon, and sigma. Since the energy influx doesn’t change through the simulation, calculate what that is (units W/m2).
+	\item At the end of the simulation, in the code you submit for review, you will use
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+matplotlib.pyplot.plot( time_list, temperature_list)
+matplotlib.pyplot.show()
+\end{lstlisting}
+
+to create a plot of the temperature versus time. Create an array for time_list, initially [ 0 ] (a ‘list’ or array with one value in it, the number 0), and similarly for temperature_list. Set the initial temperature (maybe to 0 K, or whatever you like), and calculate the initial heat content (units of J/m2).
+
+	\item Create a loop for time steps. Each step, calculate the outgoing heat flux, and the new heat content after taking up and giving off heat. Append the value of the time, and the temperature, from each step, at the end of the time and temperature lists.
+	
+Python tricks you may find useful:
+a. arrayname.append( value ) to add another item to the end of a list
+b. pow(T[-1],4) would raise the last temperature in the T list to the power of 4
+My script for this model is 23 lines long.
+
+
+\end{enumerate}
+
+
+\subsubsection{Python 이용 해설}\index{}
+
+Create a version of your python code which takes an argument from stdin for the number of time steps, using
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+nSteps = int(input(""))
+\end{lstlisting}
+
+Note that the input statement differs between python 2.x and 3.x. Be sure to develop your python code using version 3 so it will run on the coursera servers. It's tricky, because python2 is the default "python" on most systems, but python3 is the version that is currently supported and is the future.
+
+Also be sure to remove any plotting code (matplotlib) from your submission. Just insert a hash tag before the lines, to "comment it out".
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+#import matplotlib
+\end{lstlisting}
+
+
+At the end of the simulation, have the code print out the temperature and the heat flux at that time, on a line by itself, using statements like
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+print(TK[-1], heatOut)
+\end{lstlisting}
+
+Python interprets an index of -1 (in the square brackets) as the last element in the list, which will be the last temperature. When you run the code, the print statement should write a number all by itself on a single line of output, and that should be the only line of output from the code. Make sure it is in Kelvins.
+
+For the heat flux, make sure that it is in units of Watts/m2, and make it current with the temperature. So, you'll calculate the heat flux at the beginning of a time step, then a new temperature. At the end of the simulation, calculate the heat flux one more time, using the temperature you got at the end of the last time step.
+
+As a check, running the code with one time step gives
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+python naked_planet.py
+1
+44.15624999999999 0.21555186906704765  
+\end{lstlisting}
+
+where you type in the first two lines, and the third comes from your code, and with two time steps
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+python naked_planet.py
+2
+88.2722123292339 3.442540862251764     
+\end{lstlisting}
+
+There should only be two numbers output from the program, no text from a prompt (like "how many time steps would you like?", perfectly normal for interacting with humans but not with the grader). Any extraneous output will probably confuse the grader. The tolerances in the grader for temperatures are 2-3 degrees C, and for the heat fluxes, +- 0.1 W/m2.
+
+\begin{code}[흑체 복사평형 온도]
+	%	\begin{align}
+	\begin{lstlisting}
+	
+import numpy
+import matplotlib.pyplot
+
+#variables
+TimeStep = 20.0         # years
+waterDepth = 4000.0      # meters
+L = 1350.0               # Watts/m^2
+albedo = 0.3             # No dim
+epsilon = 1.0            # No dim
+sigma = 0.0000000567     # W/m^2 K^4
+Time = 0.                 #year
+Teaperature = 0.00        #K
+Heatcontents = 0.00         #J/m^2
+Heatcapacity = 4200000. * waterDepth     #J/K m^2
+
+#arrays
+Teaperature_list=[]
+Time_list=[]
+Heatcontents_list=[]
+HeatIN_list=[]
+HeatOUT_list=[]
+
+#calculate
+for i in range(0,100):
+Time_list.append(Time)
+Teaperature_list.append(Teaperature)
+Heatcontents_list.append(Heatcontents)
+HeatIN = L*(1-albedo)/4
+HeatOUT = epsilon * sigma * Teaperature**4
+HeatIN_list.append(HeatIN)
+HeatOUT_list.append(HeatOUT)
+Heatcontents = Heatcontents + ((HeatIN - HeatOUT) * TimeStep * 265.2425 * 24 * 3600)
+Teaperature = Heatcontents / Heatcapacity
+Time = Time + TimeStep
+
+#draw chart
+matplotlib.pyplot.plot(Time_list, Teaperature_list)
+matplotlib.pyplot.show()
+	
+	\end{lstlisting}
+	%		\end{align}
+\end{code}
+
+\subsubsection{Quiz}\index{}
+Adapt the code to simulate a dry planet, like Mars. The effective heat capacity of a solid surface is much smaller than that of an ocean, because heat diffuses very slowly in solids compared to fluid mixing in liquids. On time scales of a few years, heat penetrates a meter or a few meters into a soil column. Approximate a solid surface by changing the depth of the water in your model to 1 meter.
+
+The trick here is that you will have to take smaller time steps to keep the numerical method from blowing up. A good way to see what's going on is to decrease the ocean depth in stages. Start with 2000 meters, then 1000, then 100, then 10, then 1. Each time you'll have to make the time step shorter, and if it's too long you'll see the numerics to crazy.
+
+What is the longest time step you can take for model stability, using a water depth of 1 m?
+
+
+
+Change the initial temperature to 400 Kelvins. What is the value of the outgoing emission flux at time 0, within a tolerance of 1 Watt/m2?
+
+
+
+Set the ocean depth to 4000 meters and the time step to 10 years. Keep he initial temperature 400 K from the last problem. What is the outgoing heat flux after 100 years?
+
+
+
+What is the outgoing heat flux, in Watts/m2, after 2000 years? (Your model should be in equilibrium at this point).
+
+
+
+
+\subsection{Iterative Runaway Ice-Albedo Feedback Model}\index{Iterative Runaway Ice-Albedo Feedback Model}
+
+\subsubsection{How the Model Works}\index{}
+
+The second model you're going to be working on is an iterative model of the Ice-Albedo Feedback and how it affects the temperature of the Earth. So instead of stepping through the time in this model, we're going to be making successive guesses of what the right answers are and the guesses will converge and get closer. You get the same answer every time you guess as you get towards the end, so it's a fundamentally different kind of calculation. 
+0:30
+So the idea is that if planet is cold, it will have ice and snow, which is very reflective, and so that will reflect incoming energy. Whereas if the planet is warmer there's none of that stuff, and so the sunlight is absorbed more effectively. So if this is the energy balance of the planet, here is the incoming solar [COUGH], and here is the outgoing infrared which is a function of the temperature of the planet. 
+1:00
+The Albedo here kind of comes off the top of the incoming solar, gets reflected away, rather than absorbed and this is a function of ice, which is a function of temperature. 
+1:12
+So, the calculation gives you a linear function of temperature to describe the latitude, that ice will form on a planet, so the colder it is, the more the ice can be found closer and closer to the equator. And another equation is given with the Albedo as a function of temperature, and again, you're going to fit a straight line to the data that you're given. And so the idea is to start with a guess for the Albedo, and then using that Albedo, calculate the temperature. 
+1:55
+And then from this temperature get another guess for the Albedo, and then go back for another temperature, and then back and forth, back and forth, iterating between Albedo and temperature. This is what the snowball code looks like in Python, it has one loop going up and the other loop going down where we're looping over different values of the solar constant. So, for going down we start with a high solar constant, and so, the temperature is warm and the Albedo is probably ice free and that's true for many of these different values of L. But then, at some point you cross a value of L where it starts to freeze a little bit and so then it takes a few iterations, this is the number of iterations here for the temperature and Albedo to stop changing. And then at some point there's a critical solar constant value at which all of a sudden the feedbacks run all the way to the equator, and the temperatures 
+3:10
+go all the way down, the Earth gets covered with ice like a snowball. 
+3:17
+So if i change the plot type here and run that again, we can see. We are now looking at the equilibrium temperature after the iterations as a function of the solar constant in this dimension. And the reason why this isn't a simple line is because there is hysteresis in the system, if you start up here from an ice-free state and you cool the sun down in this dimension, the temperature, of course, gets colder but you don't start to get any ice until you reach an insulation that's sort of here, solar sunlight rate insulation. And then at some point you drop down into the snowball make it colder, it's just ice frozen all the way anyways, so just the sun effect here. But then as you warm it back up, the ice sheet is able to perpetuate its own existence by reflecting sunlight back to space. And so to get out of the snowball, it takes considerably more work, than it took to get- than it took sort of coolness to get into it, this is what we call hysteresis, or path dependence. 
+Downloads
+
+Lecture Videomp4
+Subtitles (English)
+WebVTT
+Transcript (English)
+
+
+\subsubsection{T와 Ice ltitude and Albedo 파라메타}\index{}
+
+The first part of this calculation is a pair of regressions to calculate the slope and intercept for two linear functions: one is the latitude to which there will be snow and ice on the surface (lower latitudes, closer to the equator, when it’s colder), and the second is the overall albedo from ice that you will get at that temperature. You are looking for functions Ice latitude = m1 * T + b1 and albedo = m2 * T + b2. The regression is probably easier to do in a spreadsheet, either using a built-in least-squares function, or by setting up a trial function with values of m and b in cells that you tweak by hand, and compare the resulting line in a plot with the plotted values of the data.
+
+Use the following table to derive functions to describe the ice latitude and the albedo from the ice as a function of the mean planetary top-of-atmosphere (radiating) temperature.Assume that the functions are linear (which they pretty much are in this table).
+
+Mean Planetary Temperature	Ice Latitude	Planetary Albedo
+265	75	0.15
+255	60	0.25
+245	45	0.35
+235	30	0.45
+225	15	0.55
+215	0	0.6타
+
+The functions should be in slope / intercept form, as in ice_latitude = m1 * T + b1 and albedo = m2 * T + b2.
+
+\subsubsection{스프레드시트 이용}\index{}
+It is possible for a spreadsheet to do all the calculations that the Python version of this exercise will do, but it's starting to get cumbersome. You will want to do about 40 values of L, and each value of L will require 100 iterations or so before we can be sure that the process has converged. In a spreadsheet, typically, all of the iterations would be saved in separate cells. (It is also possible to use built-in iteration functions in some spreadsheets, which might avoid this problem). A sensible solution might be to restrict the spreadsheet to working on a single value of L, which will be useful for checking and debugging your Python script, and then leave the power-crunching of lots of different values of L to the script.
+
+Set a value of L as a labelled number in a cell (with units!). You'll also need an initial guess for the albedo, and maybe values for epsilon and sigma would be useful. Also make cells with the slope and intercept values for your parameterized fits to the albedo and ice-latitude functions of temperature you derived in the first part.
+
+Each iteration will take a separate line in the sheet. The left-most column should contain an iteration number. Start with 1 in the top cell and then write a formula adding 1 to that, in the cell below it. Then copy that formula down until you reach 100. (This can be done in one big copy operation).
+
+The next column will be temperature guesses, and the third albedos.
+
+Solve for the first temperature guess assuming the initial guess for the albedo. Then use that temperature to calculate a new albedo, the second guess, below the first. The albedo depends on the temperature in your parameterization, but don’t allow your parameterization to extrapolate to values outside the range in the data, that is, higher than a value of 0.7, or lower than a value of 0.15. You can use the MIN and MAX functions of the spreadsheet to limit the values to the reasonable range. Then, from that albedo second guess, calculate a second guess for the temperature. Construct these formulas so that they can be copied down to fill out the rest of the iterations.
+
+Make a plot of temperature versus iteration number to see how many iterations it takes before it converges. A value of L to try is 1250 W/m2, with an initial guess for the albedo of 0.15.
+
+\subsubsection{Python 이용}\index{}
+
+As in the last problem, begin by importing library packages that we'll need, for messing with lists (arrays), and for plotting.
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+import numpy
+import matplotlib.pyplot
+\end{lstlisting}
+
+Define and initialize variables for the number of iterations, the M and B values from the albedo and ice line regressions from Part I, and for epsilon and sigma. Also set up variables for the range of L values over which you are going to do the calculation
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+LRange = [ 1200, 1600 ]
+\end{lstlisting}
+Each pass over the range in L values requires two nested loops, the outer one over values of L, and the inner one for the iterations. Start with a cooling sweep from the highest L value
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+L = LRange[1]
+albedo = 0.15
+while L > LRange[0]-1:
+blah blah blah
+L = L - 10
+LRange = [ 1200, 1600 ]
+\end{lstlisting}
+
+where you'll want to replace the pseudo-code ("blah blah blah") with another, inner, loop, in which you iterate, finding new values for albedo, then T, then albedo again, until the T and albedo values you wind up with are consistent with each other (it "converges"). Before you begin any of the iterations, set the albedo to 0.15, and for each iteration (for each L), set the initial albedo for your iteration equal to the value you got for the converged albedo from the last iteration. Then go back and forth, calculating T from that initial albedo, then albedo from that T (limited to the range 0.15 to 0.65), back and forth each time. In contrast to the spreadsheet, there is not much penalty for taking lots of iterations; it doesn’t get ungainly but just runs slower.
+
+Copy this loop-within-a-loop into a second pass in your code, then modify it to start from the lowest value of L (LRange[0]), and work back up to LRange[1]. Use the same strategy for albedo: for the initial guess, use the final value from the last set of iterations (the last L value).
+
+For plotting, build three options. It's easiest to just have one plot at a time, so define a variable plotType which contains a string telling what kind of plot you want to see.
+
+As the code runs, it should fill up two lists, which we can call x and y. What you put into x and y as the run progresses depends on the value of the variable plotType.
+
+Initialize the lists with
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+x_list = []              # an empty list
+y_list = []
+\end{lstlisting}
+
+then each time you want to add something to the list, append the values to the end of the list, as, for example,
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+x_list.append( L )
+\end{lstlisting}
+
+The three options for plots types I'd recommend are:
+
+Option 1: the temperature after the iterations are done for each value of L, plotted as a function of L, for the entire series of calculations as L first sweeps down and then back up again. This plot will show the hysteresis in the ice albedo feedback, how there are multiple steady states for some intermediate values of L (including our own!).
+
+Option 2: the temperature each iteration, for each value of L, plotted as a function of the iteration number, for the first sweep over L values, when each L is lower than the last. The trick here is to insert values of numpy.nan (stands for Not A Number) into the x and y arrays at the end of each iteration loop, when the number of iterations resets from the maximum number (for the last L value) to 0 (for the next L value). When matplotlib makes a plot of these lists, we don't want it to draw a line connecting these. It makes the plot messy and doesn't mean anything. So the nan value tells the plot library not to draw that line.
+
+Option 3: same as option 2 but for the second sweep through the range in L, when the sun is getting hotter as you go through.
+
+There are other interesting things you might want to see, such as the albedo or the ice latitude in any of these plot types. To see the ice latitude as a function of L, change the y_list.append( ) statement to append the ice latitude rather than the temperature.
+
+Then, when all the calculations are done,
+
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+matplotlib.pyplot.plot( x, y )
+matplotlib.pyplot.show( )
+\end{lstlisting}
+
+will create a plot of your results.
+
+My script required about 60 lines of python code. New python functions you may find useful include min() and max().
+
+
+\subsubsection{Quiz}\index{}
+
+
+On the downward sweep through L (getting colder each time), What is the maximum value of the solar constant, L, in units W/m2, for which the planet freezes all the way to the equator? (Make sure you have enough iterations to see that your temperature and albedo have reached equilibrium). The tolerance in the grader is a range of 20 W/m2.
+
+
+Now on the upward sweep through the range in L, at some critical L value (in Watts/m2), the temperature jumps up to a higher value. What value of L do you get for this sudden transition, as the snowball melts? The tolerance in the grader is a range of 50 W/m2.
+
+
+
+\subsection{A Simple 1-D Ice Sheet Flow Model}\index{A Simple 1-D Ice Sheet Flow Model}
+
+Ice Sheet Dynamics
+
+Ice flows like extra-thick molasses, downhill. The shape of the ice sheet (altitude versus distance across) is determined by the relationship between ice surface slope and the flow rate of the ice.
+
+
+\subsubsection{How the Model Works}\index{}
+The Ice Sheet Model is formulated in one dimension, a horizontal dimension and so we have snow that's accumulating all the way across this dimension. And as the ice gets thicker and thicker you get a slope at the ice surface which drives a pressure gradient which drives flow in both directions. The flow is always going sort of down hill. The flow is given by the surface slope, the change in elevation over the change in x of the slope of the surface there, times some constant, which will be given to you. So we're going to solve this problem numerically by breaking it up into pieces, and each of those pieces, we're going to call a grid cell. And so there will be some number of grid cells across the domain, and each grid cell has an elevation which is defined in the center of the cell and so 
+1:11
+the slope in the elevation would be the difference in x divided by the difference in x so the slope would be sort of between two adjacent points like that. And then there are flows defined in the domain as well going between one grid cell and another. So the flows are actually defined on the cell faces, whereas the elevations are in the cell centers. Another crucial part of this problem is the boundary condition. We have to keep it zero at the edges where the ice is flowing into the water. We're not going to let it build up higher than that. And that sort of controls the whole domain of the ice sheet. And the way that boundary condition manifests itself in a grid like this is to have some extra grid points, some sort of ghost 
+2:00
+grid cells on both sides, where you specify that the elevation has to be equal to zero at all times. So you have to treat those cells special. >> So this is what the Ice Sheet Model looks like in my spreadsheet version. I have, as usual, some parameters up at the top govern things, so I can change stuff on the fly and have it reflected everywhere, including units. So time step in years, 100 years. 
+2:30
+I have the time steps on rows going down here. So, this is the time in years, and this is going up to 23 thousand years and then we have to have elevations and we have to have flows. So I have elevations, I have ten of those, and then I have two grid cells at the edges, and then the flows go between those elevations. So, can see right 
+3:02
+here there's difference in elevation 
+3:07
+with x and that means that you get a flow there. 
+3:13
+In Python, this is what the code looks like. 
+3:18
+It's a short little code, very easy, and this is what it looks like when it runs. So now we're making the Python make a new plot every single time step and so you can see how the elevation is changing through time. 
+3:38
+We change the number of grid points. Say we make 20 grid points instead of ten. 
+3:50
+We get a smoother curve but we have to be careful about the time step. 
+3:55
+Because as you make the grid points closer together, you need to make the time step 
+4:01
+shorter, or else something like that happens where it just blows up. Decrease the time step. 
+4:10
+In general, a factor of two change in the size, factor of two change in the time step should work. More or less, we'll see. 
+4:24
+Taking longer for the action to happen here, because we're taking shorter time steps. 
+
+\subsubsection{Model Formulation}\index{}
+Ice flows, like any other fluid, only very slowly, due to its high viscosity. The force driving the flow is differences in pressure in the interior of the ice, which arise from differences in the elevation of the ice surface. If you make a pile of ice, it's like a pile of molasses, in that it will flow outward and flatten itself out.
+
+The model is formulated in one dimension, on a horizontal grid. Start with 10 grid cells. Let them span a horizontal distance of 1000 km, or 10^6 meters. Each grid cell will have an elevation of ice. Flow between adjacent cells depends on the difference between their elevations. Snow falls equally on all grid cells. Also, vitally important to this type of problem, is a boundary condition. We'll assume that the ice sheet is confined to a landmass like Greenland or Antarctica, so that the thickness of the ice at the boundaries has to be zero. Ice flows into the ocean and disappears, both in reality and in our model.
+
+In the real world, the ice surface might slope upward in some direction throughout what we are calling a grid point. The elevation we are keeping track of might be the average elevation within that region. For the best approximation to reality from our simple grid, let's specify that the elevation of a cell applies in the center of the cell. In contrast, the flow between the cells can most sensibly be defined on the cell boundaries. This combination is called a "staggered" grid, where all of the variables are not defined in the same places. Including flows from the grid cells on the edges of the ice sheet, there will be 11 flows among the 10 grid cells of the simulation. My suggestion is to draw a cartoon with your grid, showing the index numbers of the two variables. It can get confusing.
+
+The confusion is compounded by the boundary condition (the ice vanishes when it hits the ocean). The easiest way is to define two extra grid cells for the elevations, and keep them always set to a value of 0. This means that you will have nX+1 = 11 values in the list of fluxes (between each of the 10 boxes), and nX+2=12 values in the list for elevations, to contain the "ghost" cells that will always have 0 elevation.
+
+The model will step forward in time, using a time step of 100 years. It will begin to rise uniformly, but the elevations at the edges will be eroded by flow to the ocean. Eventually it will reach a steady state, where snowfall in each grid cell is balanced by flow from the grid cell, which is all determined by the slope of the ice surface.
+
+Parameter Settings
+
+Set the following parameter values
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+nX = 10                # number of grid points
+domainWidth = 1e6      # meters
+timeStep = 100         # years
+nYears = 50000         # years
+flowParam = 1e4        # m horizontal / yr
+snowFall = 0.5         # m / y
+\end{lstlisting}
+
+Initialize the elevations to zero.
+
+Calculate the flows as
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+flow[ix] = ( elevation[ix] - elevation[ix+1] ) / dX * flowParam  * \
+( elevation[ix]+elevation[ix+1] ) / 2 / dX
+\end{lstlisting}
+
+where the first incidence of the dX variable is to calculate the gradient in elevation, and the second one corrects for the aspect ratio of the grid cell, how much horizontal flow translates into vertical elevation. Be sure that you have the indexing right for your implementation of the staggered grid, and be sure to get the sign right, so that flow from the first cell in the list to the second would be defined as positive.
+
+Then update the elevations by adding ( snowFall + flow[ix-1] - flow[ix] ) * timeStep.
+
+Repeat the cycle, calculating flows, then taking time steps in the elevation. Watch the ice sheet grow in, through time, to its equilibrium shape, which will be determined by the math in the equations described above
+
+\subsubsection{스프레드 시트 이용}\index{}
+
+I always find it useful to take some space at the top of a spreadsheet for model parameters, like the time step etc. I use three cells for each parameter, one for the name, one for the units (years, in this case), and a third for the numeric value.
+
+Beginning below the parameter area, make a column of time values, with a step equal to the time step. You'll want to see many thousands of years.
+
+Set up an array of 12 columns alongside the time column, for the elevations. Fill the first and 12th column with zeros. Fill the first row with zeros.
+
+Set up another array of 11 columns to hold the flow rates. Create the formula for the first flow rate (leftmost, topmost) by referencing the contents of two elevation values, and parameters like the flow constant. Use relative addressing to point to elevations, and absolute addressing to point to parameters, so that you can copy the formula you create across and down across the entire block of flow values.
+
+Go back to the elevation array, and write a formula to update the elevations in the first grid cell (leftmost, topmost). The ice in that cell in year 100 will be equal to that in year 0, plus snowfall, plus flow coming in from the left (which will be positive if it's coming into this cell), minus flow going out to the right. Because the flow is actually going to the left in this first cell, the flow number you'll be using should be negative.
+
+Use relative and absolute addressing as you did with the flow formula so that you can copy the elevation formula to the rest of the elevation block.
+
+Make a plot of the elevation as a function of distance at some time slice, to see the shape of the ice sheet as it evolves toward its steady state.
+
+
+\subsubsection{Python 이용}\index{}
+
+The advantage of a scripting tool like python for this calculation is that it's no trouble at all to do a longer calculation -- we don't have to save all the intermediate values of all the variables.
+
+Initialize the elevations and flows
+
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+elevations = numpy.zeros(nX+2)
+flows = numpy.zeros(nX+1)
+\end{lstlisting}
+
+Create a time loop which first calculates flows (by looping over the horizontal grid points, using the current values of the elevations), then takes a time step for the elevations (looping over the horizontal grid again).
+
+The plotting infrastructure in Python, matplotlib, can be used to create a cool animation of the evolving ice sheet. Before starting the time loop, set things up using
+
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+fig, ax = matplotlib.pyplot.plot.subplots()
+ax.plot(elevations)
+ax.set_ylim([0,plotLimit])
+matplotlib.pyplot.plot.show(block=False)
+\end{lstlisting}
+
+where the block=False flag tells Python to throw the plot on the screen then keep moving. Within the time loop, issue the commands
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+ax.clear()
+ax.plot( elevations )
+matplotlib.plot.show( block=False )
+matplotlib.pyplot.pause(0.001)
+fig.canvas.draw()
+\end{lstlisting}
+
+These commands will update the plot to show the latest elevations, and then keeps moving.
+
+
+\subsubsection{Quiz}\index{}
+Set up the code to run for 25,000 years of simulated time. Does the code reach equilibrium by the end of this time?  
+yes / no
+
+What elevation does the ice sheet reach, in meters?
+
+
+What is the longest value of the time step that you can use, which still looks like the solution you got above?
+
+
+When the model uses a time step which is just a bit too long, what happens to the run?
+
+- It crashes immediately
+- It starts up unstable (with oscillating values) then settles down for the equilibrium part of the simulation.
+- It runs OK while it's spinning up but gets twitchy and blows up after it reaches equilibrium
+
+If you double the snowfall rate, the equilibrium elevation of the ice sheet
+
+ - doubles
+ - more than doubles
+ - less than doubles
+ - stays the same
+
+\subsection{A 2-D Gridded Shallow Water Model}\index{A 2-D Gridded Shallow Water Model}
+Pressure, Rotation, and Fluid Flow
+
+Planetary rotation and fluid flow were explained in Part I of this class, Unit 6, on Weather and Climate.
+
+\subsubsection{How the Model Works}\index{}
+0:05
+The shallow-water equations are not necessarily called that because water has to be shallow, but because the flows are the same at all water depths. So we're doing the calculation of water flow that is independent of water depth where you don't have different flows. You have to maintain different grid cells in the vertical, you just need a lattice of grid cells in two dimensions in the horizontal. So this is what that grid looks like, so this is latitude and longitude. And each grid cell has an elevation of water level height which is defined, just like in the ice sheet model, it's defined in the cell centers. And then there are flows between the cells, which are like in the ice sheet model designed on the cell edges. So the grid could look like h00, h01, h02, and then v velocities, which are the north south velocities defined on the south faces there are now four of them as opposed to the three elevations. Just like in the ice sheet model, you have to worry about the boundaries. Now the north and south boundaries, we are going to say that there is a wall there so. These flows are both going to all equal zero across that wall and that wall. In the horizontal dimension there will be two options you're going to build into your code. One is to put walls there which means that you'll be setting these velocities, these u values to be zero. And the other is to have it wrap around in which case, you have stuff can flow out one side and it would just flow in the other side. So the way that you calculate the evolution of the elevation of the surface is by tracking the flows coming and going out the boundaries. So dU/dX, that's saying you have, more flowing in this side than that side. That would give you a value du dx that would actually be decreasing as you go this way. And so the negative of that multiplied by the aspect ratio. Tells you how much of this water is going to be piling up and making this box get deeper. 
+2:31
+So to accomplish this model, you are going to be given a template which has a lot of the overhead dealt with for you already like that makes the animation and what not. So this is what that template looks like. There's some stuff here at the top that you can play with after you get everything going. 
+2:52
+Some stuff here that you probably won't need to change. It's just sort of set up and then here is the main time stepping subroutine, and there are instructions for how to write Python loops to calculate the derivatives. The DUDX and the VDDY and things like that. In this loop, so you just need to flesh out this loop here. As the template comes initially, it's simplest to de-bug a thing like this when it's got a really small grid. So, this is what the thing will look like, just in the three by three grid. And the colors are the elevations and the arrows are the flows defined at the cell faces, like I said. And this particular simulation starts out with a big tower of water in the middle. And you get wild flow initially but then it settles down to a geostrophic balance where the rotation is balancing the pressure gradient sort of sideways. Three by three isn't very exciting so if we expand that to a bigger grid so there's the initial transient waves going all over the place. But then it settles down, and you get this sort of rotation going around the perturbation, this high pressure in the center. And this wave will tend to drift to the west. Because the rotation of the planet in higher latitudes is faster than the rotation rate in lower latitudes and that's set in this model. And so that tends to make raspy waves like this drift toward the west. So you can see this cell is getting redder and redder than that one as this peak is sort of going to slowly move across this grid, toward the West. I should say that this is a very, very small ocean. And it's got a very big degree of rotational change between the lower part latitude and the high latitude here. So it's like a small ocean on a small planet, but with the limited power of Python, we have to do what we can to make things run quickly. 
+5:21
+Here's another trick that the shallow water circulation code can do. In this case, you have winds that are blowing in this direction toward the west in the lower 
+5:35
+half of this domain and in the upper half the winds are blowing toward the east. And with the rotation what that does is it causes water to pile up in the center of this gyre. And once this water piles up, that pressure gradient actually starts to drive the flow around the gyre. So it's going the way the wind would tell it to go, but it's going there because the pressure gradient in the water is telling it to, not because the wind is telling it to. These arrows arise as this pressure difference in the water arises. And then this is like a giant Rossby wave, it's drifting to the west. And what that does in this case where you have walls at the east and west boundaries is it tends to lead to an intense flow on the Westward boundary. This is called Westward intensification and it's responsible for the Gulf stream and the Kuroshio and other Western boundary currents around the world that are very intense for this dynamical reason. 
+
+\subsubsection{Model Description}\index{Model Description}
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+"""
+The first section of the code contains setup and initialization 
+information.  Leave it alone for now, and you can play with them later 
+after you get the code filled in and running without bugs.  
+"""
+
+# Set up python environment.  numpy and matplotlib will have to be installed
+# with the python installation.
+
+import numpy
+import matplotlib.pyplot as plt
+import matplotlib.ticker as tkr
+import math
+
+# Grid and Variable Initialization -- stuff you might play around with
+
+ncol = 3         # grid size (number of cells)
+nrow = ncol
+
+nSlices = 2         # maximum number of frames to show in the plot
+ntAnim = 1          # number of time steps for each frame
+
+horizontalWrap = True # determines whether the flow wraps around, connecting
+# the left and right-hand sides of the grid, or whether
+# there's a wall there. 
+interpolateRotation = True
+rotationScheme = "PlusMinus"   # "WithLatitude", "PlusMinus", "Uniform"
+
+# Note: the rotation rate gradient is more intense than the real world, so that
+# the model can equilibrate quickly.
+
+windScheme = ""  # "Curled", "Uniform"
+initialPerturbation = "Tower"    # "Tower", "NSGradient", "EWGradient"
+textOutput = False
+plotOutput = True
+arrowScale = 30
+
+dT = 600 # seconds
+G = 9.8e-4 # m/s2, hacked (low-G) to make it run faster
+HBackground = 4000 # meters
+
+dX = 10.E3 # meters, small enough to respond quickly.  This is a very small ocean
+# on a very small, low-G planet.  
+
+dxDegrees = dX / 110.e3
+flowConst = G  # 1/s2
+dragConst = 1.E-6  # about 10 days decay time
+meanLatitude = 30 # degrees
+
+# Here's stuff you probably won't need to change
+
+latitude = []
+rotConst = []
+windU = []
+for irow in range(0,nrow):
+if rotationScheme is "WithLatitude":
+latitude.append( meanLatitude + (irow - nrow/2) * dxDegrees )
+rotConst.append( -7.e-5 * math.sin(math.radians(latitude[-1]))) # s-1
+elif rotationScheme is "PlusMinus":
+rotConst.append( -3.5e-5 * (1. - 0.8 * ( irow - (nrow-1)/2 ) / nrow )) # rot 50% +-
+elif rotationScheme is "Uniform":
+rotConst.append( -3.5e-5 ) 
+else:
+rotConst.append( 0 )
+
+if windScheme is "Curled":
+windU.append( 1e-8 * math.sin( (irow+0.5)/nrow * 2 * 3.14 ) ) 
+elif windScheme is "Uniform":
+windU.append( 1.e-8 )
+else:
+windU.append( 0 )
+itGlobal = 0
+
+U = numpy.zeros((nrow, ncol+1))
+V = numpy.zeros((nrow+1, ncol))
+H = numpy.zeros((nrow, ncol+1))
+dUdT = numpy.zeros((nrow, ncol))
+dVdT = numpy.zeros((nrow, ncol))
+dHdT = numpy.zeros((nrow, ncol))
+dHdX = numpy.zeros((nrow, ncol+1))
+dHdY = numpy.zeros((nrow, ncol))
+dUdX = numpy.zeros((nrow, ncol))
+dVdY = numpy.zeros((nrow, ncol))
+rotV = numpy.zeros((nrow,ncol)) # interpolated to u locations
+rotU = numpy.zeros((nrow,ncol)) #              to v
+
+midCell = int(ncol/2)
+if initialPerturbation is "Tower":
+H[midCell,midCell] = 1
+elif initialPerturbation is "NSGradient":
+H[0:midCell,:] = 0.1
+elif initialPerturbation is "EWGradient":
+H[:,0:midCell] = 0.1
+
+"""
+This is the work-horse subroutine.  It steps forward in time, taking ntAnim steps of
+duration dT.  
+"""
+
+def animStep():    
+
+global stepDump, itGlobal
+
+# Time Loop
+for it in range(0,ntAnim):
+
+# Here is where you need to build some code
+
+# Encode Longitudinal Derivatives Here
+
+# Encode Latitudinal Derivatives Here
+
+# Calculate the Rotational Terms Here
+
+# Assemble the Time Derivatives Here
+
+# Step Forward One Time Step
+
+# Update the Boundary and Ghost Cells
+
+#   Now you're done
+
+itGlobal = itGlobal + ntAnim
+
+def firstFrame():
+global fig, ax, hPlot
+fig, ax = plt.subplots()
+ax.set_title("H")   
+hh = H[:,0:ncol]
+loc = tkr.IndexLocator(base=1, offset=1)
+ax.xaxis.set_major_locator(loc)
+ax.yaxis.set_major_locator(loc)
+grid = ax.grid(which='major', axis='both', linestyle='-')
+hPlot = ax.imshow(hh, interpolation='nearest', clim=(-0.5,0.5))   
+plotArrows()
+plt.show(block=False) 
+
+def plotArrows():
+global quiv, quiv2
+xx = []
+yy = []
+uu = []
+vv = []
+for irow in range( 0, nrow ):
+for icol in range( 0, ncol ):
+xx.append(icol - 0.5)
+yy.append(irow )
+uu.append( U[irow,icol] * arrowScale )
+vv.append( 0 )
+quiv = ax.quiver( xx, yy, uu, vv, color='white', scale=1)
+for irow in range( 0, nrow ):
+for icol in range( 0, ncol ):
+xx.append(icol)
+yy.append(irow - 0.5)
+uu.append( 0 )
+vv.append( -V[irow,icol] * arrowScale )
+quiv2 = ax.quiver( xx, yy, uu, vv, color='white', scale=1)
+
+def updateFrame():
+global fig, ax, hPlot, quiv, quiv2
+hh = H[:,0:ncol]
+hPlot.set_array(hh)
+quiv.remove()    
+quiv2.remove()
+plotArrows()
+fig.canvas.draw()
+print("Time: ", math.floor( itGlobal * dT / 86400.*10)/10, "days")
+
+def textDump():
+print("time step ", itGlobal)    
+print("H", H)
+print("dHdX" )
+print( dHdX)
+print("dHdY" )
+print( dHdY)
+print("U" )
+print( U)
+print("dUdX" )
+print( dUdX)
+print("rotV" )
+print( rotV)
+print("V" )
+print( V)
+print("dVdY" )
+print( dVdY)
+print("rotU" )
+print( rotU)
+print("dHdT" )
+print( dHdT)
+print("dUdT" )
+print( dUdT)
+print("dVdT" )
+print( dVdT)
+
+if textOutput is True:
+textDump()
+if plotOutput is True:
+firstFrame()
+for i_anim_step in range(0,nSlices):
+animStep()
+if textOutput is True:
+textDump()
+if plotOutput is True:
+updateFrame()
+#print(dHdT[0,1])
+
+
+\end{lstlisting}
+
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+
+
+\subsubsection{....}\index{}
+
+
+\begin{lstlisting}%[caption={code for map}, label=lst:Pythoncode]
+
+\end{lstlisting}
+
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
+\subsubsection{....}\index{}
