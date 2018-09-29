@@ -8,7 +8,6 @@ df = pd.read_table(filename, skiprows=43, sep=';', header=None, index_col=0,
                    names = ['HIP', 'Vmag', 'Plx', 'B-V', 'SpType'],
                    skipfooter=1, engine='python')
 
-
 df_clean = df.apply(lambda x: x.str.strip()).replace('', np.nan)
 
 df_clean= df_clean.dropna()
