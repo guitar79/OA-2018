@@ -119,7 +119,7 @@ b = df_clean['SpType'].map(f)
 plot_lum_class(b,'yellow', 'I: supergiants')
 
 ax.tick_params(axis='both', labelsize=14)
-legend = ax.legend(scatterpoints=1,markerscale = 6, shadow=True)
+legend = ax.legend(scatterpoints=1,markerscale = 4, shadow=True)
 frame = legend.get_frame()
 
 '''
