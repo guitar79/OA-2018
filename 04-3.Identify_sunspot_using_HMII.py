@@ -169,7 +169,6 @@ for a in range(0,im_width):
                 longi = math.degrees(longi)
                 #sunspot_data.append([longi, latit, num_pixel])
                 sunspot_data.append([int(x_average), int(y_average), num_pixel])
-#                draw_sunspot[int(x_average), int(y_average)] = 0
 print ('*'*80)
 print ('number of sunspot : ', len(sunspot_data))
 print ('sunspot data : ', sunspot_data) #x, y, num_pixel
@@ -200,5 +199,5 @@ else :
                 edgecolor=(0, 0.8, 0.8), linewidth=3, alpha=0.5)
     ax.add_patch(circle)    
     # plot sunspot
-    plt.plot(sunspot_data[:,0], (sunspot_data[:,1]), 'ro', markersize=3, markerfacecolor='C0')
+    plt.plot(sunspot_data[:,0], (sunspot_data[:,1]), 'ro', markersize=3)
     plt.show()
