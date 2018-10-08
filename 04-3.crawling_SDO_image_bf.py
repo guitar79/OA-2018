@@ -12,7 +12,6 @@ site = 'https://sdo.gsfc.nasa.gov/assets/img/browse/'
 target = '1024_HMII.jpg'
 
 from datetime import datetime, timedelta
-import time
 import os
 import urllib.request
 from urllib.request import urlopen
@@ -30,10 +29,12 @@ start_date = datetime.date(datetime.strptime(startdate, '%Y%m%d'))
 end_date = datetime.date(datetime.strptime(enddate, '%Y%m%d'))
 duration = (end_date - start_date).days
 
-def filename_to_time(filename):
+def filename_to_hour(filename):
     fileinfo = filename.split('_')
-    return time.strptime(fileinfo[0]+fileinfo[1], '%Y%m%d%H%M%S')
+    return datetime.strptime(fileinfo[0]+fileinfo[1], '%Y%m%d%H%M%S')
 #print(filename_to_time('20170228_231038_1024_MHII.jpg'))
+
+dn_file_time = datetime.today()
 
 for i in range(duration):
     dn_date = start_date + timedelta(i)
@@ -47,15 +48,17 @@ for i in range(duration):
     for i in range(5, len(file_list)):
         filename = file_list[i].text
         #print ('debug', filename)
-        if (filename[(-len(target)):] == target) :
-            if filename_to_time(filename).tm_hour in(req_hour) : # hour gap between downloading images
-                print ('Trying %s' % filename)
-                if os.path.exists('%s/%s' % (drout, filename)):
-                    print ('*'*40)
-                    print (filename + 'is exist')
-                else :
-                    urllib.request.urlretrieve(url+filename, '%s/%s' % (drout, filename))
-                    print ('*'*60)
-                    print ('Downloading' + filename)
+        if (filename[(-len(target)):] == target) \
+        and int(filename_to_hour(filename).strftime('%H')) in(req_hour) \
+        and dn_file_time.strftime('%Y%m%d%H') != filename_to_hour(filename).strftime('%Y%m%d%H') : # hour gap between downloading images
+            print ('Trying %s' % filename)
+            if os.path.exists('%s/%s' % (drout, filename)):
+                print ('*'*40)
+                print (filename + 'is exist')
+            else :
+                urllib.request.urlretrieve(url+filename, '%s/%s' % (drout, filename))
+                print ('*'*60)
+                print ('Downloading' + filename)
+                dn_file_time = filename_to_hour(filename)
         else:
-            #print ('Skipping ' + filename)
+            print ('Skipping ' + filename)
