@@ -3,12 +3,9 @@
 # Based on python 2.7.12 by Seungwon Park
 # change to python 3.6 by guitar79@gs.hs.kr
 
-# get data from https://sdo.gsfc.nasa.gov/assets/img/browse/
+# download SDO data from https://sdo.gsfc.nasa.gov/assets/img/browse/
 # file name structure : 20170228_231038_1024_MHII.jpg
 # conda install beautifulsoup
-
-site = 'https://sdo.gsfc.nasa.gov/assets/img/browse/'
-target = '1024_HMII.jpg'
 
 from datetime import datetime, timedelta
 import os
@@ -16,29 +13,38 @@ import urllib.request
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-# downloading perid and time gap
+# some variables for downloading (site, file, perid and time gap, etc.)
+site = 'https://sdo.gsfc.nasa.gov/assets/img/browse/'
+target = '1024_HMII.jpg' #this tpye of image will be downloading
+
 startdate = '20180101' #start date
-enddate = '20180105' #end date
-time_gap = 3 #time gap
-request_hour = range(0,24,time_gap)
-#request_hour = [0, 3, 6, 9, 12, 15, 18, 21] #request hour
+enddate = '20180102' #end date
+time_gap = 6 #time gap
+request_hour = range(0,24,time_gap) #make list
+#request_hour = [0, 3, 6, 9, 12, 15, 18, 21] #make list
+
+#variable for calculating date
+start_date = datetime.date(datetime.strptime(startdate, '%Y%m%d')) #convert startdate to date type
+end_date = datetime.date(datetime.strptime(enddate, '%Y%m%d')) #convert enddate to date type
+duration = (end_date - start_date).days #total days for downloading
+print ('*'*80)
+print ((duration+1), 'days', int((duration+1)*(24/time_gap)), 'files will be downloaded')
 
 #make directory for saving files
 save_folder = startdate + '-' + enddate + '-' + target[:-4] + '/'
 if not os.path.exists(save_folder):
-	os.makedirs(save_folder)
-
-#for calculating date
-start_date = datetime.date(datetime.strptime(startdate, '%Y%m%d'))
-end_date = datetime.date(datetime.strptime(enddate, '%Y%m%d'))
-duration = (end_date - start_date).days
-
+    os.makedirs(save_folder)
+    print ('*'*80)
+    print (save_folder, 'is created')
+else :
+    print ('*'*80)
+    print (save_folder, 'is exist')
+    
 def filename_to_hour(filename):
     fileinfo = filename.split('_')
     return datetime.strptime(fileinfo[0]+fileinfo[1], '%Y%m%d%H%M%S')
 
-#for downloading 1 file per request_hour
-download_file_time = datetime.today()
+download_file_time = datetime.today() #variable for comparing with downloading filename
 
 for i in range(duration):
     download_date = start_date + timedelta(i)
@@ -46,12 +52,16 @@ for i in range(duration):
     url = site + directory
     print ('*'*80)
     print ('trying %s ' % url)
+    # using BeutifulSoup for crowling
     soup = BeautifulSoup(urlopen(url), "html.parser")
+    #print('soup : ', soup)
     pre_list = soup.find_all('pre')
+    #print('pre_list', pre_list)
     file_list = pre_list[0].find_all('a')
+    #print('file_list', file_list)
+    # select file fot downloading
     for i in range(5, len(file_list)):
         filename = file_list[i].text
-        #print ('debug', filename)
         if (filename[(-len(target)):] == target) \
             and int(filename_to_hour(filename).strftime('%H')) in(request_hour) \
             and download_file_time.strftime('%Y%m%d%H') != filename_to_hour(filename).strftime('%Y%m%d%H') : 
