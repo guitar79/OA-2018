@@ -206,4 +206,4 @@ else :
     plt.savefig('identify sunspot %s.png', dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', papertype=None, format=None,
         transparent=False, bbox_inches=None, pad_inches=0.1,
-        frameon=None, metadata=None, % (object_name))
+        frameon=None, metadata=None, % (fname))
