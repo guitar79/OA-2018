@@ -201,3 +201,9 @@ else :
     # plot sunspot
     plt.plot(sunspot_data[:,0], (sunspot_data[:,1]), 'ro', markersize=3)
     plt.show()
+
+    # save image
+    plt.savefig('identify sunspot %s.png', dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', papertype=None, format=None,
+        transparent=False, bbox_inches=None, pad_inches=0.1,
+        frameon=None, metadata=None, % (object_name))
