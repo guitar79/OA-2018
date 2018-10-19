@@ -200,10 +200,11 @@ else :
     ax.add_patch(circle)    
     # plot sunspot
     plt.plot(sunspot_data[:,0], (sunspot_data[:,1]), 'ro', markersize=3)
-    plt.show()
-
     # save image
-    plt.savefig('identify sunspot %s.png', dpi=None, facecolor='w', edgecolor='w',
+    plt.savefig('identify sunspot '+ fname+ '.png', dpi=None, facecolor='w', edgecolor='w',
         orientation='portrait', papertype=None, format=None,
         transparent=False, bbox_inches=None, pad_inches=0.1,
-        frameon=None, metadata=None, % (fname))
+        frameon=None, metadata=None)
+    plt.show()
+
+    
