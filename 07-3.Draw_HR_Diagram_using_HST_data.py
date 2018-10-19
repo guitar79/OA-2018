@@ -41,7 +41,6 @@ plt.gca().invert_yaxis()
 
 plt.grid()
 
-
 #save the Diagram
 plt.savefig('H-R Diagram.png', dpi=None, facecolor='w', edgecolor='w', \
         orientation='portrait', papertype=None, format=None, \

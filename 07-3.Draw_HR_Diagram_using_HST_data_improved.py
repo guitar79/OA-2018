@@ -27,10 +27,6 @@ for i in range(0, len(ch1_data)):
             color[i] = ch1_data[i,5] - ch2_data[j,5]
             break # Once the matched item is found from F814, go to next star of F450.
 
-# Plot HR Diagram (Color Index - Instrument Magnitude)
-# axis lable, scale, etc....
-
-
 # Get current size
 fig_size = plt.rcParams["figure.figsize"]
 print ("Current size:", fig_size)
