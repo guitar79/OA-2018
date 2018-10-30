@@ -8,7 +8,6 @@ conda install astropy
 """
 
 from astropy.io import fits
-
 import matplotlib.pyplot as plt
 
 #dir_name = '20181012.M42'

@@ -17,15 +17,15 @@ from astropy.stats import sigma_clip
 import os
 #import os.path
 
-dir_name = '20181012.M42'
+dir_name = '20161029.NGC2244.stf'
 #img_chls = ['L', 'R', 'G', 'B', 'H', 'S', 'O', 'u', 'b', 'v', 'r', 'i']
-img_chls = ['L', 'R', 'G', 'B']
+img_chls = ['L', 'R', 'G', 'B', 'H']
 
 #If you wnat to change the refrence file, please input the file order number...
 ref_image_no = 0
 
 #variable for saving fits file (True or False)
-fits_save = True 
+fits_save = False 
 
 # read 16bit monochrome fits file and make numpy array
 def fits_to_cv2(image_path):
@@ -49,7 +49,7 @@ def align_image(im1, im2):
     # Convert images to grayscale
     #im1_gray = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
     #im2_gray = cv2.cvtColor(im2,cv2.CO
-    LOR_BGR2GRAY)
+    
     im1_gray = im1
     im2_gray = im2
     im1_32f_gray = np.array(im1_gray/65536.0, dtype=np.float32)
