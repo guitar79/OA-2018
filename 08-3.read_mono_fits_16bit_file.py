@@ -7,7 +7,6 @@ Use only 16bit monochrome fits file
 conda install astropy
 """
 
-import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 
@@ -16,22 +15,17 @@ f_name = 'm42-003L.fit'
 
 # read 16bit monochrome fits file
 hdu = fits.open(f_name)
-print(hdu)
+print('hdu :', hdu)
+print('dir(hdu)\n', dir(hdu))
 
-print(dir(hdu))
+print('hdu.info()\n', hdu.info())
+print('hdu[0].data\n', hdu[0].data)
+print('hdu[0].header\n', hdu[0].header)
 
-
-print(hdu.info())
-print(hdu[0].data)
-print(hdu[0].header)
-
-
+# save data from fits file
 fits_data = hdu[0].data
-print(fits_data.shape)
-print(fits_data)
-
-fits_array = np.array(fits_data, dtype=np.uint16)
-
+print('fits_data.shape\n', fits_data.shape)
+print('fits_data\n', fits_data)
 
 # show fits file 
 plt.imshow(fits_data, cmap = 'gray', interpolation = 'None')

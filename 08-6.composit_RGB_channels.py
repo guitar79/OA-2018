@@ -3,24 +3,32 @@
 Spyder Editor
 guitar79@naver.com
 
+conda install tifffile
 """
 
 from PIL import Image
+import tifffile as tiff
 import pylab as py
 #import numpy as np
 #폴더명 지정
-base_dr = 'C:/KH_data/2018년/G5.동탄고영재학급/180721.COMS/AVHRR/'
+dir_name = '20161029.NGC2244.all/'
 
 #RGB 각 채널에 해당하는 파일명 입력
-R_file = "201211281413_m01.bmp"
-G_file = "201211281413_m02.bmp"
-B_file = "201211281413_m04.bmp"
+R_file = 'mean_image_R.png'
+G_file = 'mean_image_R.png'
+B_file = 'mean_image_R.png'
 
 #RGB 각 채널별 파일을 8bit grayscale 이미지로 변경
-red = Image.open(base_dr+R_file).convert('L')
-green = Image.open(base_dr+G_file).convert('L')
-blue= Image.open(base_dr+B_file).convert('L')
+red = Image.open(dir_name+R_file).convert('L')
+green = Image.open(dir_name+G_file).convert('L')
+blue= Image.open(dir_name+B_file).convert('L')
 
+red = Image.open(dir_name+R_file)
+green = Image.open(dir_name+G_file)
+blue= Image.open(dir_name+B_file)
+
+a = 
+tiff.imsave('new.tiff', a)
 #8bit 이미지를 RGB 채널에 넣고 합성
 out = Image.merge("RGB", (red, green, blue))
 
@@ -34,4 +42,4 @@ py.imshow(blue, aspect='equal')
 py.imshow(out, aspect='equal')
 
 #이미지를 저장
-out.save(base_dr+"img-out.png",'png')
+out.save(dir_name+"img-out.png",'png')
