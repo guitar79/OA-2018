@@ -19,8 +19,8 @@ print('hdu :', hdu)
 print('dir(hdu)\n', dir(hdu))
 
 print('hdu.info()\n', hdu.info())
-print('hdu[0].data\n', hdu[0].data)
 print('hdu[0].header\n', hdu[0].header)
+print('hdu[0].data\n', hdu[0].data)
 
 # save data from fits file
 fits_data = hdu[0].data
