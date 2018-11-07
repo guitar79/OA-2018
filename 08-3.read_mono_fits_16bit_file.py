@@ -23,6 +23,7 @@ print('hdu.info()\n', hdu.info())
 print('hdu[0].header\n', hdu[0].header)
 print('hdu[0].data\n', hdu[0].data)
 hdu[0].data = np.array(hdu[0].data/4.0, dtype=np.uint16)
+
 # save data from fits file
 fits_data = hdu[0].data
 print('fits_data.shape\n', fits_data.shape)

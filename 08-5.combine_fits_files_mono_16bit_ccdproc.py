@@ -9,8 +9,10 @@ conda config --add channels http://ssb.stsci.edu/astroconda
 conda install -c astropy ccdproc
 """
 
-from ccdproc import combine
 import numpy as np
+import cv2
+from ccdproc import combine
+import matplotlib.pyplot as plt
 
 filelist = np.loadtxt('file.list', dtype=bytes).astype(str)
 f_name_output = 'combined1.fits'
@@ -19,6 +21,15 @@ bias = combine(filelist.tolist(),       # ccdproc does not accept numpy.ndarray,
                method='median',         # default is average so I specified median.
                unit='adu')              # unit is required: it's ADU in our case.
 
+#convert to 16bit
 bias.data = np.array(bias.data, dtype=np.uint16)
 bias.write(f_name_output, overwrite =True)
+
+#combine image using algned_images:            
+cv2.imwrite('NGC2244-R-mean_image.png', bias.data)
+
+# show fits file 
+plt.imshow(bias.data, cmap = 'gray', interpolation = 'None')
+plt.show()
+
 

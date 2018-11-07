@@ -15,9 +15,8 @@ import cv2
 from astropy.io import fits
 from astropy.stats import sigma_clip
 import os
-#import os.path
 
-dir_name = '20161029.NGC2244.all'
+dir_name = '20161029.NGC2244.all/'
 #img_chls = ['L', 'R', 'G', 'B', 'H', 'S', 'O', 'u', 'b', 'v', 'r', 'i']
 img_chls = ['L', 'R', 'G', 'B', 'H']
 
@@ -48,12 +47,14 @@ def align_image(im1, im2):
     #change to 16 bit mono
     # Convert images to grayscale
     #im1_gray = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
-    #im2_gray = cv2.cvtColor(im2,cv2.CO
-    
+    #im2_gray = cv2.cvtColor(im2,cv2.COLOR_BGR2GRAY)
+
     im1_gray = im1
     im2_gray = im2
+    
     im1_32f_gray = np.array(im1_gray/65536.0, dtype=np.float32)
     im2_32f_gray = np.array(im2_gray/65536.0, dtype=np.float32)
+    
     # Find size of image1
     sz = im1.shape
     # Define the motion model
@@ -82,10 +83,12 @@ def align_image(im1, im2):
     return im2_aligned
 
 img_lists = sorted(glob(os.path.join(dir_name, '*.fit')))
+#change to uppercate
 img_lists = [element.upper() for element in img_lists] ; img_lists
 
 #for img_list in sorted(glob(os.path.join(data_dir, '*.fit'))) : 
 ref_image = fits_to_cv2(img_lists[ref_image_no])
+ref_hdu = fits.open(img_lists[ref_image_no])
 print('reference image is', img_lists[ref_image_no])
 
 if len(img_lists) > 2 :
@@ -110,16 +113,22 @@ if len(img_lists) > 2 :
             print(len(aligned_images), 'images in channel', img_chl, 'are aligned')
             #combine image using algned_images:            
             mean_image = np.mean(aligned_images, axis=0).astype(dtype=np.uint16)
-            cv2.imwrite(dir_name+'/mean_image_'+img_chl+'.png', mean_image)
+            cv2.imwrite(dir_name+'mean_image_'+img_chl+'.png', mean_image)
+            ref_hdu[0].data = mean_image
+            ref_hdu.writeto(dir_name+'mean_image_'+img_chl+'.fit', overwrite =True)
             print ('Succeed in combining', len(imgs_to_align), 'images on channel', img_chl, '(average)')
                         
             median_image = np.median(aligned_images, axis=0).astype(dtype=np.uint16)
-            cv2.imwrite(dir_name+'/median_image_'+img_chl+'.png', median_image)
+            cv2.imwrite(dir_name+'median_image_'+img_chl+'.png', median_image)
+            ref_hdu[0].data = median_image
+            ref_hdu.writeto(dir_name+'median_image_'+img_chl+'.fit', overwrite =True)
             print ('Succeed in combining', len(imgs_to_align), 'images on channel', img_chl, '(median)')
             
             sigma_clip_image = sigma_clip(aligned_images, sigma=3, \
                         sigma_lower=None, sigma_upper=None, iters=5, axis=None, copy=True)
-            cv2.imwrite(dir_name+'/sigma_clip_image_'+img_chl+'.png', sigma_clip_image[0])
+            cv2.imwrite(dir_name+'sigma_clip_image_'+img_chl+'.png', sigma_clip_image[0])
+            ref_hdu[0].data = sigma_clip_image[0]
+            ref_hdu.writeto(dir_name+'sigma_clip_image_'+img_chl+'.fit', overwrite =True)
             print ('Succeed in combining', len(imgs_to_align), 'images on channel', img_chl, '(sigma clip)')
             
         except Exception as err: 

@@ -14,18 +14,22 @@ from astropy.io import fits
 from astropy.stats import sigma_clip
 import matplotlib.pyplot as plt
 
-img_name = ['NGC2244-001R_aligned.FIT', 'NGC2244-002R_aligned.FIT',\
+img_names = ['NGC2244-001R_aligned.FIT', 'NGC2244-002R_aligned.FIT',\
             'NGC2244-003R_aligned.FIT','NGC2244-004R_aligned.FIT',\
             'NGC2244-005R_aligned.FIT','NGC2244-006R_aligned.FIT']
 
+print('img_names',  img_names)
+print('img_names[0]',  img_names[0])
+
 #
 list_images = []
-for i in(img_name):
-    hdu = fits.open(i)
+for img_name in(img_names):
+    hdu = fits.open(img_name)
     data = hdu[0].data
-    image = np.array(data, dtype=np.uint16)
-    list_images.append(image)
-
+    image_data = np.array(data, dtype=np.uint16)
+    list_images.append(image_data)
+print('list_images',  list_images)
+print('iist_images[0]',  list_images[0])
     
 #combine image using algned_images:            
 mean_image = np.mean(list_images, axis=0).astype(dtype=np.uint16)
