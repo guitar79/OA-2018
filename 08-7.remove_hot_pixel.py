@@ -18,17 +18,7 @@ def fits_to_cv2(image_path):
     hdu = fits.open(image_path)
     data = hdu[0].data
     return np.array(data, dtype=np.uint16)
-
-def save_fits_after_process(image_path, res_data):
-    hdu = fits.open(image_path)
-    hdu[0].data = res_data
-    hdu.writeto(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:], overwrite =True)
-    if os.path.isfile(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:]) :
-        fits.setval(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:], 'NOTES', value='processed by guitar79@naver.com')
-        return print('bad_paxel_removed fits file is created')
-    else : 
-        return print('failure creating bad_paxel_removed fits file...')
-    
+   
 #https://stackoverflow.com/questions/18951500/automatically-remove-hot-dead-pixels-from-an-image-in-python
 def find_outlier_pixels(data, tolerance=2.0, worry_about_edges=True):
     #This function finds the hot or dead pixels in a 2D dataset. 
@@ -120,14 +110,28 @@ def find_outlier_pixels(data, tolerance=2.0, worry_about_edges=True):
 
     return hot_pixels,fixed_image
 
-f_name = 'NGC2244-001H.fit'
-cv2_data = fits_to_cv2(f_name)
+def save_fits_after_process(image_path, res_data):
+    hdu = fits.open(image_path)
+    hdu[0].data = res_data
+    hdu.writeto(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:], overwrite =True)
+    if os.path.isfile(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:]) :
+        fits.setval(image_path[:-4]+'_bad_pixel_removed'+image_path[-4:], 'NOTES', value='processed by guitar79@naver.com')
+        return print('bad_paxel_removed fits file is created')
+    else : 
+        return print('failure creating bad_paxel_removed fits file...')
 
+#start process
+f_name = 'NGC2244-001H.fit'
+
+#identify bad pixel and fix image
+cv2_data = fits_to_cv2(f_name)
 hot_pixels,fixed_image = find_outlier_pixels(cv2_data)
 
+#display on the screen
 plt.imshow(fixed_image, interpolation='nearest', origin='lower', cmap = 'gray')
+
+#write png file
 cv2.imwrite(f_name[:-4]+'bad_pixel_removed.png', fixed_image)
 
+#save fits file 
 save_fits_after_process(f_name, fixed_image)
-    
-
