@@ -134,4 +134,4 @@ plt.imshow(fixed_image, interpolation='nearest', origin='lower', cmap = 'gray')
 cv2.imwrite(f_name[:-4]+'bad_pixel_removed.png', fixed_image)
 
 #save fits file 
-save_fits_after_process(f_name, fixed_image)
+save_fits_after_process(f_name[:-4]+'bad_pixel_removed.fit', fixed_image)
