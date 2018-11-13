@@ -23,13 +23,11 @@ bias = combine(filelist.tolist(),       # ccdproc does not accept numpy.ndarray,
 
 #convert to 16bit
 bias.data = np.array(bias.data, dtype=np.uint16)
-bias.write(f_name_output, overwrite =True)
+bias.write('NGC2244-R-median_image.fit', overwrite =True)
 
 #combine image using algned_images:            
-cv2.imwrite('NGC2244-R-mean_image.png', bias.data)
+cv2.imwrite('NGC2244-R-median_image.png', bias.data)
 
 # show fits file 
 plt.imshow(bias.data, cmap = 'gray', interpolation = 'None')
 plt.show()
-
-

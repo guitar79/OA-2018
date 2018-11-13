@@ -16,7 +16,7 @@ from astropy.io import fits
 from astropy.stats import sigma_clip
 import os
 
-dir_name = '20181012.M42/'
+dir_name = '20151211.IC434/'
 #img_chls = ['L', 'R', 'G', 'B', 'H', 'S', 'O', 'u', 'b', 'v', 'r', 'i']
 img_chls = ['L', 'R', 'G', 'B', 'H']
 
@@ -35,7 +35,7 @@ def fits_to_cv2_uint16(image_path):
     return np.array(data, dtype=np.uint16)
 
 #https://stackoverflow.com/questions/18951500/automatically-remove-hot-dead-pixels-from-an-image-in-python
-def find_outlier_pixels(data, tolerance=2.0, worry_about_edges=True):
+def find_outlier_pixels(data, tolerance=1.0, worry_about_edges=True):
     #This function finds the hot or dead pixels in a 2D dataset. 
     #tolerance is the number of standard deviations used to cutoff the hot pixels
     #If you want to ignore the edges and greatly speed up the code, then set
@@ -177,9 +177,10 @@ def save_fits_after_align(image_path, res_data):
         return print('failure creating aligned fits file...')
     
 
-### Start process
+
 ### Start process
 img_lists = sorted(glob(os.path.join(dir_name, '*.fit')))
+
 #change to uppercate
 img_lists = [element.upper() for element in img_lists] ; img_lists
 
@@ -202,6 +203,7 @@ if len(img_lists) > 2 :
             for img_to_process in imgs_to_process :
                 img_cv2 = fits_to_cv2_uint16(img_to_process)
                 hot_pixels, fixed_cv2 = find_outlier_pixels(img_cv2)
+                #hot_pixels, fixed_cv2 = find_outlier_pixels(fixed_cv2)
                 res_image = align_image(ref_image, fixed_cv2)
                 aligned_images.append(res_image)
                 print ('Succeed in alignment the', img_to_process, 'file ......')

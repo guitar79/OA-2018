@@ -20,7 +20,7 @@ def fits_to_cv2(image_path):
     return np.array(data, dtype=np.uint16)
    
 #https://stackoverflow.com/questions/18951500/automatically-remove-hot-dead-pixels-from-an-image-in-python
-def find_outlier_pixels(data, tolerance=2.0, worry_about_edges=True):
+def find_outlier_pixels(data, tolerance=0.5, worry_about_edges=True):
     #This function finds the hot or dead pixels in a 2D dataset. 
     #tolerance is the number of standard deviations used to cutoff the hot pixels
     #If you want to ignore the edges and greatly speed up the code, then set
@@ -125,13 +125,18 @@ f_name = 'NGC2244-001H.fit'
 
 #identify bad pixel and fix image
 cv2_data = fits_to_cv2(f_name)
-hot_pixels,fixed_image = find_outlier_pixels(cv2_data)
+hot_pixels1, fixed_image1 = find_outlier_pixels(cv2_data)
+hot_pixels2, fixed_image = find_outlier_pixels(fixed_image1)
 
 #display on the screen
 plt.imshow(fixed_image, interpolation='nearest', origin='lower', cmap = 'gray')
 
-#write png file
-cv2.imwrite(f_name[:-4]+'bad_pixel_removed.png', fixed_image)
+print('fixed_image',fixed_image)
+print('type(fixed_image)', type(fixed_image))
+
+cv2.imwrite(f_name[:-4]+'_bad_pixel_removed.png', fixed_image)
 
 #save fits file 
-save_fits_after_process(f_name[:-4]+'bad_pixel_removed.fit', fixed_image)
+hdu_fixed = fits.open(f_name)
+hdu_fixed[0].data = fixed_image
+hdu_fixed.writeto(f_name[:-4]+'_bad_pixel_removed.fit', overwrite =True)
