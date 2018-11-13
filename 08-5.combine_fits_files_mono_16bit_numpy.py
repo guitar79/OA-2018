@@ -35,21 +35,28 @@ print('iist_images[0]',  list_images[0])
 mean_image = np.mean(list_images, axis=0).astype(dtype=np.uint16)
 cv2.imwrite('NGC2244-R-mean_image.png', mean_image)
 
+# write 16bit monochrome fits file
+hdu[0].data = mean_image
+hdu.writeto('NGC2244-R-mean_image.fits', overwrite =True)
+
 # show fits file 
 plt.imshow(mean_image, cmap = 'gray', interpolation = 'None')
 plt.show()
             
 median_image = np.median(list_images, axis=0).astype(dtype=np.uint16)
 cv2.imwrite('NGC2244-R-median_image.png', median_image)
+hdu[0].data = median_image
+hdu.writeto('NGC2244-R-median_image.fits', overwrite =True)
 
 # show fits file 
 plt.imshow(median_image, cmap = 'gray', interpolation = 'None')
 plt.show()
 
-
 sigma_clip_image = sigma_clip(list_images, sigma=3, \
             sigma_lower=None, sigma_upper=None, iters=5, axis=None, copy=True)
 cv2.imwrite('NGC2244-R-sigma_clip_image.png', sigma_clip_image[0])
+hdu[0].data = sigma_clip_image[0]
+hdu.writeto('NGC2244-R-sigma_clip_image.fits', overwrite =True)
 
 # show fits file 
 plt.imshow(sigma_clip_image[0], cmap = 'gray', interpolation = 'None')
