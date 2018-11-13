@@ -56,7 +56,7 @@ sigma_clip_image = sigma_clip(list_images, sigma=3, \
             sigma_lower=None, sigma_upper=None, iters=5, axis=None, copy=True)
 cv2.imwrite('NGC2244-R-sigma_clip_image.png', sigma_clip_image[0])
 hdu[0].data = sigma_clip_image[0]
-hdu.writeto('NGC2244-R-sigma_clip_image.fits', overwrite =True)
+hdu.writeto('NGC2244-R-sigma_clip_image.fit', overwrite =True)
 
 # show fits file 
 plt.imshow(sigma_clip_image[0], cmap = 'gray', interpolation = 'None')
