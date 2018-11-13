@@ -31,9 +31,9 @@ print('image_B :', image_B)
 # make empty array for RGB image
 RGB = np.zeros((image_R.shape[0], image_R.shape[1], 3), dtype=np.float32)
 # insert each channel image
-RGB[:,:,0] = image_B
+RGB[:,:,0] = image_R
 RGB[:,:,1] = image_G
-RGB[:,:,2] = image_R
+RGB[:,:,2] = image_B
 print('RGB :', RGB)
 
 # display image
