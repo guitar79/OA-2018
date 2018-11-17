@@ -27,6 +27,7 @@ ref_image_no = 0
 fits_save = False
 png_save = True
 tif_save = False
+composite_process = True
 
 # read 16bit monochrome fits file and make numpy array
 def fits_to_cv2_uint16(image_path):
@@ -247,33 +248,46 @@ if len(img_lists) > 2 :
 
 else : 
     print ('There is no images for alignment')
+
+if composite_process == True :
+    result_stacks = ['mean', 'median', 'sigma_clip']
+    for result_stack in result_stacks :
+        # read 16bit monochrome fits file
+        hdu_R = fits.open(dir_name+'R_'+result_stack+'_image.fit')
+        image_R = np.array(hdu_R[0].data/65536.0, dtype=np.float32)
+        hdu_G = fits.open(dir_name+'G_'+result_stack+'_image.fit')
+        image_G = np.array(hdu_G[0].data/65536.0, dtype=np.float32)
+        hdu_B = fits.open(dir_name+'B_'+result_stack+'_image.fit')
+        image_B = np.array(hdu_B[0].data/65536.0, dtype=np.float32)
     
-result_stacks = ['mean', 'median', 'sigma_clip']
-for result_stack in result_stacks :
-    # read 16bit monochrome fits file
-    hdu_R = fits.open(dir_name+'R_'+result_stack+'_image.fit')
-    image_R = np.array(hdu_R[0].data/65536.0, dtype=np.float32)
-    hdu_G = fits.open(dir_name+'G_'+result_stack+'_image.fit')
-    image_G = np.array(hdu_G[0].data/65536.0, dtype=np.float32)
-    hdu_B = fits.open(dir_name+'B_'+result_stack+'_image.fit')
-    image_B = np.array(hdu_B[0].data/65536.0, dtype=np.float32)
+        # make empty array for RGB image
+        RGB = np.zeros((image_R.shape[0], image_R.shape[1], 3), dtype=np.float32)
+        # insert each channel image
+        RGB[:,:,0] = image_B
+        RGB[:,:,1] = image_G
+        RGB[:,:,2] = image_R
+        
+        # write 48 bit RGB png file
+        cv2.imwrite(dir_name+result_stack+'_RGB-48bit.png', RGB)
+        print(dir_name+result_stack+'RGB-48bit.png is created...')
 
-    # make empty array for RGB image
-    RGB = np.zeros((image_R.shape[0], image_R.shape[1], 3), dtype=np.float32)
-    # insert each channel image
-    RGB[:,:,0] = image_B
-    RGB[:,:,1] = image_G
-    RGB[:,:,2] = image_R
+        # insert each channel image for fits image
+        RGB1 = np.zeros((3, image_R.shape[0], image_R.shape[1]), dtype=np.uint16)
+        RGB1[0,:,:] = RGB[:,:,2]
+        RGB1[1,:,:] = RGB[:,:,1]
+        RGB1[2,:,:] = RGB[:,:,0]
 
-    # convert 16bit each channel
-    RGB = np.asarray(RGB*65536.0, dtype=np.uint16)
+        hdu = fits.PrimaryHDU(RGB1)
+        hdul = fits.HDUList([hdu])
 
-    # write 48 bit RGB png file
-    cv2.imwrite(dir_name+result_stack+'_RGB-48bit.png', RGB)
-    print(dir_name+result_stack+'RGB-48bit.png is created...')
+        hdul.writeto(dir_name+result_stack+'_RGB-48bit.fit', overwrite = True)
+        print(dir_name+result_stack+'RGB-48bit.fit is created...')
     
-    # write 48bit RGB fits file
-    hdu_R[0].data = RGB
-    hdu_R.writeto(dir_name+result_stack+'_RGB-48bit.fit', overwrite =True)
-    print(dir_name+result_stack+'RGB-48bit.fit is created...')
+        # write 48bit RGB fits file
+        hdu_R[0].data = RGB
+        hdu_R.writeto(dir_name+result_stack+'_RGB-48bit.fit', overwrite = True)
+        print(dir_name+result_stack+'RGB-48bit.fit is created...')
+        
+else : 
+    print ('48bit RGB file is not created. \n If you wnat make 48bit RGB file, set composite_process = True.... ')
 
