@@ -1,0 +1,45 @@
+from astropy.modeling.functional_models import Moffat1D, Gaussian1D
+from scipy.special import gamma as G
+import numpy as np
+from matplotlib import pyplot as plt
+
+def norm_gauss(sigma):
+    return 1/np.sqrt(2 * np.pi * sigma**2)
+
+def norm_moffat(width, power):
+    return G(power) / (width * np.sqrt(np.pi) * G(power - 1/2))
+
+def HWHM_moffat(width, power):
+    return width * np.sqrt( 2**(1/power) - 1)
+
+x       = np.arange(0,10,0.1)
+sigma   = np.array([1, 2])
+width   = np.array([2, 5])
+power   = np.array([1.5, 2.5])
+
+ax1 = plt.subplot(1,2,1)
+ax2 = plt.subplot(1,2,2)
+for s in sigma:
+    gauss  = Gaussian1D(amplitude=1, mean=0, stddev=s)    
+    ax1.plot(x, norm_gauss(s)*gauss(x), ls=":", 
+             label="sigma={0:.0f}, HWHM={1:.1f}".format(s, 2.355*s/2))
+    ax2.plot(x, -2.5 * np.log10(norm_gauss(s)*gauss(x)), ls=":", 
+             label="sigma={0:.0f}, HWHM={1:.1f}".format(s, 2.355*s/2))
+
+for w in width:
+    for p in power:
+        moffat = Moffat1D(amplitude=1, x_0=0, gamma=w, alpha=p)
+        HWHM   = HWHM_moffat(w, p)
+        ax1.plot(x, norm_moffat(w, p) * moffat(x), lw=2,
+                 label='w={0:.0f}, p={1:.1f}, HWHM={2:.1f}'.format(w, p, HWHM))
+        ax2.plot(x, -2.5*np.log10(norm_moffat(w, p) * moffat(x)), lw=2,
+                 label='width={0:.0f}, power={1:.1f}, HWHM={2:.1f}'.format(w, p, HWHM))
+
+ax1.grid(ls=":")
+ax2.grid(ls=":")
+ax2.set_ylim(1, 5)
+ax2.invert_yaxis()
+ax2.set_title('log scale = magnitude scale')
+plt.legend(bbox_to_anchor=(1.02, 1))
+plt.tight_layout()
+plt.show()
