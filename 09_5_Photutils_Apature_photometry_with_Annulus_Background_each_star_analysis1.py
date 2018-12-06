@@ -105,13 +105,13 @@ def sky_fit(all_sky, method='mode', sky_nsigma=3, sky_iter=5, \
 
 #%%
 ####################################        
-dir_name = '20170220_m35/'
+dir_name = '20170220_m35-1/'
 #dir_name = '2018-11-03.M36.FSQ106/'
 ####################################
 
 file_list = sorted(glob(os.path.join(dir_name, '*_p.fit')))
 
-for f_name in file_list[0:5]:
+for f_name in file_list:
     print('f_name :', f_name)
     hdu = fits.open(f_name)
     #img = np.array(hdu[0].data[800:1800, 1200:2200]/65536.0, dtype=np.float32)
@@ -119,7 +119,9 @@ for f_name in file_list[0:5]:
     
     # if image value < 10^(-6), replace the pixel as 10^(-6)
     #img[img < 1.e-6] = 1.e-6
-    
+    #FWHM   = 2.0    # for qsi683
+    #sky_th = 100    # for qsi683
+    ####################################
     if hdu[0].header['FWHMH'] > hdu[0].header['FWHMV'] :
         FWHM = hdu[0].header['FWHMH']
     elif hdu[0].header['FWHMH'] <= hdu[0].header['FWHMV']: 
@@ -128,11 +130,11 @@ for f_name in file_list[0:5]:
         FWHM = hdu[0].header['FWHM']
     else :     
         FWHM   = 2.0
-    #FWHM   = 2.0
-    print('FWHM: ', FWHM)
-####################################
-    sky_th = 10    # sky_th * sky_sigma will be used for detection lower limit : sky_th = 5
-####################################
+
+    #sky_th = 50    # for qsi image
+    sky_th = 20    # for 16803
+    print('FWHM: ', FWHM, 'sky_th: ', sky_th)
+    ####################################
     # What if we do "sigma-clip" than MAD?
     #sigma_clipped_stats() will return the mean, median, and standard deviation of a sigma-clipped array:
     sky_a, sky_m, sky_s_sc = sigma_clipped_stats(img) # default is 3-sigma, 5 iters
@@ -165,7 +167,7 @@ for f_name in file_list[0:5]:
         DAOcoord = (DAOfound['xcentroid'], DAOfound['ycentroid']) 
         DAOannul = CircAn(positions=DAOcoord, r_in=4*FWHM, r_out=6*FWHM)
         
-        # Save apertures as circular, 4 pixel radius, at each (X, Y)
+        # Save apertures as circular, r=2.0*FWHM radius, at each (X, Y)
         DAOapert = CircAp(DAOcoord, r=2.0*FWHM)  
         #print('DAOapert\n ', DAOapert)
         
@@ -179,6 +181,11 @@ for f_name in file_list[0:5]:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.05)
         plt.colorbar(im, cax=cax)
+        plt.gcf().suptitle('DAOstarfinder and annulus backgroud variables and results \n \
+            filename: {0!s} \n \
+            FWHM: {1:.2f}, 3 sigma 5 iters clipped case: {2:8.6f}, sky_th: {3}, Sky threshold: {4:.4f} \n\
+             {5} star(s) is(are) founded.'\
+            .format(f_name, FWHM, sky_s_sc, sky_th, thresh, N_stars), fontsize=12)
         plt.savefig(f_name[:-4]+'_DAOstarfinder_Annulus_result_all_stars.png', overwrite=True)
         #plt.show()
     
@@ -187,20 +194,23 @@ for f_name in file_list[0:5]:
         #for star_ID in range(2, 10) : # for debug
         #convert to uint16
         img_uint16 = np.array(img*65536.0, dtype=np.uint16)
+        ####################################
+        #ronoise = 8.0 #qsi-683ws
+        #gain = 0.5  #qsi-683ws
         if hdu[0].header['RDNOISE'] :
             ronoise = hdu[0].header['RDNOISE']
         else :
             ronoise = 8.0 #qsi-683ws
-        ronoise = 8.0 #qsi-683ws
+        
         if hdu[0].header['GAIN'] :
             gain = hdu[0].header['GAIN']
         elif hdu[0].header['EGAIN'] :
             gain = hdu[0].header['EGAIN']
-        #else :
-        #    gain = 0.5
-        gain = 0.5
-            #gain =  0.46599999070167542     # e/ADU
+        else :
+            gain = 0.5
+        
         N_star = len(DAOfound)
+        ####################################
         
         mag_ann  = np.zeros(N_star)
         merr_ann = np.zeros(N_star)
@@ -212,7 +222,7 @@ for f_name in file_list[0:5]:
         
         apert_result = 'ID, Msky, sky_std, Sky count Pixel_N, Sky reject Pixel_N, mag_ann, merr_ann\n'
         
-        for star_ID in range(0, N_stars)[0:20]:
+        for star_ID in range(0, N_stars):
 
             mask_annul = (DAOannul.to_mask(method='center'))[star_ID]
             mask_apert = (DAOapert.to_mask(method='center'))[star_ID]
@@ -256,28 +266,43 @@ for f_name in file_list[0:5]:
             apert_result += '{0:04}, {1:.5f}, {2:.5f}, {3:4d}, {4:3d}, {5:.3f}, {6:.3f}\n'\
             .format(star_ID, msky, sky_std, nsky, nrej, mag_ann[star_ID], merr_ann[star_ID])
             
-            fig = plt.figure(figsize=(12,12))
+            fig = plt.figure(figsize=(12,14))
             fig.add_subplot(2,3,1)
             plt.imshow(cutimg, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
             plt.ylabel('pixels')
             plt.grid(ls=':')
-            plt.xlabel('DAO Star area image\n sum: {0} \n mean: {1:.3f}\n std: {2:.3f} \n max: {3} \n min: {4}'\
-                       .format(np.sum(cutimg), np.mean(cutimg), np.std(cutimg), np.max(cutimg), np.min(cutimg)))
+            plt.xlabel('DAO Star area image\n sum: {0} \n \
+            mean: {1:.3f}\n std: {2:.3f} \n max: {3} \n min: {4} \n \
+            Number of Pixel: {5:.0f}'\
+            .format(np.sum(cutimg), np.mean(cutimg), np.std(cutimg), np.max(cutimg), np.min(cutimg),\
+                    np.shape(cutimg)[0]*np.shape(cutimg)[1]))
             
             fig.add_subplot(2,3,2)
             plt.imshow(apert_apply, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
             plt.ylabel('pixels')
             plt.grid(ls=':')
-            plt.xlabel('DAO aperture area \n (r=2.0*FWHM)\n sum: {0:.0f}  /  {1:.3f} \n max: {2:.0f}\n min: {3:.0f} \n mean: {4:.3f} \n std: {5:.3f} \n Number of Pixel: {6}  /  {7:.5f}'\
-                       .format(np.sum(apert_pixel), apert_sum[star_ID], np.max(apert_pixel), np.min(apert_pixel), np.mean(apert_pixel), np.std(apert_pixel), len(apert_pixel), ap_area))
+            plt.xlabel('DAO aperture area \n (r=2.0*FWHM)\n sum: {0:.0f}  /  {1:.3f} \n \
+            mean: {4:.3f} \n std: {5:.3f} \n \
+            max: {2:.0f}\n min: {3:.0f} \n \
+            Number of Pixel: {6}  /  {7:.3f}'\
+            .format(np.sum(apert_pixel), apert_sum[star_ID], \
+                    np.mean(apert_pixel), np.std(apert_pixel), \
+                    np.max(apert_pixel), np.min(apert_pixel), \
+                    len(apert_pixel), ap_area))
 
             fig.add_subplot(2,3,3)
-            plt.imshow(sky_apply, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
+
+            im = plt.imshow(sky_apply, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
+            #divider = make_axes_locatable(ax)
+            #cax = divider.append_axes("right", size="3%", pad=0.05)
+            #cbar = plt.colorbar(im, cax=cax)
+            #cbar.set_label('ADU', rotation=270)
             plt.ylabel('pixels')
             plt.grid(ls=':')
             plt.xlabel('DAO annulus area \n (r_in=4*FWHM, r_out=6*FWHM)\n sum: {0:.0f} \n max: {1:.0f} \n min: {2:.0f} \n mean: {3:.3f}  /  {4:.3f}\n std: {5:.3f}  /  {6:.3f} \n Number of sky pixels: {7} \n Number of reject pixels: {8}'\
-                       .format(np.sum(sky_pixel), np.max(sky_pixel), np.min(sky_pixel), np.mean(sky_pixel), msky, np.std(sky_pixel), sky_std, nsky, nrej))
+            .format(np.sum(sky_pixel), np.max(sky_pixel), np.min(sky_pixel), np.mean(sky_pixel), msky, np.std(sky_pixel), sky_std, nsky, nrej))
             
+            '''
             #fig.add_subplot(2,3,4)
             #plt.imshow(cutimg, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
             #plt.ylabel('pixels')
@@ -289,48 +314,63 @@ for f_name in file_list[0:5]:
             plt.imshow(apert_nan, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
             plt.ylabel('pixels')
             plt.grid(ls=':')
-            plt.xlabel('DAO aperture area \n (r=2.0*FWHM)\n sum: {0:.0f}  /  {1:.3f} \n max: {2:.0f}\n min: {3:.0f} \n mean: {4:.3f} \n std: {5:.3f} \n Total pixel number: {6} \n Pixel number of aperture: {7}  /  {8:.5f}'\
-                       .format(np.nansum(apert_nan), apert_sum[star_ID], np.nanmax(apert_nan), np.nanmin(apert_nan), np.nanmean(apert_nan), np.nanstd(apert_nan), np.shape(apert_nan)[0]*np.shape(apert_nan)[1], np.count_nonzero(~np.isnan(apert_nan)), ap_area))
+            plt.xlabel('DAO aperture area \n \
+            (r=2.0*FWHM)\n sum: {0:.0f}  /  {1:.3f} \n max: {2:.0f}\n min: {3:.0f} \n mean: {4:.3f} \n std: {5:.3f} \n Total pixel number: {6} \n Pixel number of aperture: {7}  /  {8:.5f}'\
+            .format(np.nansum(apert_nan), apert_sum[star_ID], np.nanmax(apert_nan), np.nanmin(apert_nan), np.nanmean(apert_nan), np.nanstd(apert_nan), np.shape(apert_nan)[0]*np.shape(apert_nan)[1], np.count_nonzero(~np.isnan(apert_nan)), ap_area))
 
             fig.add_subplot(2,3,6)
             plt.imshow(sky_nan, vmin=np.mean(cutimg/5.0), vmax=np.mean(cutimg*2.0), origin='lower')
             plt.ylabel('pixels')
             plt.grid(ls=':')
-            plt.xlabel('DAO annulus area \n (r_in=4*FWHM, r_out=6*FWHM)\n sum: {0:.0f} \n max: {1:.0f} \n min: {2:.0f} \n mean: {3:.3f}  /  {4:.3f}\n std: {5:.3f}  /  {6:.3f} \n Pixel number of annulus: {7} \n Pixel number of accept: {8} \n Pixel number of reject: {9}'\
-                       .format(np.nansum(sky_nan), np.nanmax(sky_nan), np.nanmin(sky_nan), np.nanmean(sky_nan), msky, np.nanstd(sky_nan), sky_std, np.count_nonzero(~np.isnan(sky_nan)), nsky, nrej))
+            plt.xlabel('DAO annulus area \n \
+            (r_in=4*FWHM, r_out=6*FWHM)\n \
+            sum: {0:.0f} \n mean: {1:.3f} \n \
+            max: {2:.0f} \n min: {3:.0f}  /  {4:.3f}\n \
+            std: {5:.3f}  /  {6:.3f} \n \
+            Pixel number of annulus: {7} \n \
+            Pixel number of accept: {8} \n Pixel number of reject: {9}'\
+            .format(np.nansum(sky_nan), np.nanmean(sky_nan), \
+                    np.nanmax(sky_nan), np.nanmin(sky_nan), msky, \
+                    np.nanstd(sky_nan), sky_std, \
+                    np.count_nonzero(~np.isnan(sky_nan)), \
+                    nsky, nrej))
             
             
-            plt.gcf().suptitle('DAOstarfinder Annulus result \n filename: {0!s}, star ID: {1:04}, FWHM: {2:.2f} \n read out noise: {3:.2f}, gain: {4:.3f}, flux_star: {5:.3f}, flux_err: {6:.3f} \n instrumental magnitude: {7:.3f}, mag_err: {8:.3f}'\
-                   .format(f_name, star_ID, FWHM, ronoise, gain, flux_star, flux_err, mag_ann[star_ID], merr_ann[star_ID]), fontsize=12)
-            #plt.colorbar(size="5%", pad=0.05)                        
+            '''
+            fig.add_subplot(2,3,4)
+            plt.hist(cutimg)
+            plt.ylabel('pixels')
+            plt.grid(ls=':')
+            plt.xlabel('Histogram of DAO Star area', fontsize = 12)
+            
+            fig.add_subplot(2,3,5)
+            plt.hist(apert_nan)
+            plt.ylabel('pixels')
+            plt.grid(ls=':')
+            plt.xlabel('Histogram of DAO aperture area', fontsize = 12)
+
+            fig.add_subplot(2,3,6)
+            plt.hist(sky_nan)
+            plt.ylabel('pixels')
+            plt.grid(ls=':')
+            plt.xlabel('Histogram of annulus area', fontsize = 12)
+            
+            plt.gcf().suptitle('DAOstarfinder and annulus backgroud variables and results \n \
+            filename: {0!s} \n \
+            FWHM: {1:.2f}, 3 sigma 5 iters clipped case: {2:8.6f}, sky_th: {3}, Sky threshold: {4:.4f}\n\
+            star ID: {5:04},  read out noise: {6:.2f}, gain: {7:.3f}\n \
+            flux_star: {8:.3f}, flux_err: {9:.3f} \n \
+            instrumental magnitude: {10:.3f}, mag_err: {11:.3f}'\
+            .format(f_name, FWHM, sky_s_sc, sky_th, thresh, \
+            star_ID, ronoise, gain, \
+            flux_star, flux_err, \
+            mag_ann[star_ID], merr_ann[star_ID]), fontsize=12)
+            
             plt.savefig('{0!s}_DAOstarfinder_starID_{1:04}_Annulus_result.png'\
-                        .format(f_name[:-4], star_ID), overwrite=True)
+            .format(f_name[:-4], star_ID), overwrite=True)
             print('{0!s}_DAOstarfinder_starID_{1:04}_Annulus_result.png is saved'\
-                  .format(f_name[:-4], star_ID))
+            .format(f_name[:-4], star_ID))
             #plt.show()
         #print(apert_result)
         with open(f_name[:-4]+'_DAOstarfinder_all_AP_Annulus_result.csv', 'w') as f:
             f.write(apert_result)
-
-        #%%
-        '''
-        plt.figure(figsize=(16,12))
-        plt.errorbar([i], msky, yerr=sky_std, capsize=3, marker='o', color='b')
-        plt.xlabel('Star ID', fontsize=16)
-        plt.ylabel('msky +- sky_std', fontsize=16)
-        plt.xticks(np.arange(0, N_stars, step=int(N_stars/10)))
-        plt.grid(ls=':')
-        plt.savefig(f_name[:-4]+'_AP_Annulus_Msky_sky_std_result.png', overwrite=True)
-        #plt.show()
-           
-        plt.figure(figsize=(16,12))
-        plt.errorbar(i, mag_ann[i], yerr=merr_ann[i], marker='x', ms=10, capsize=3)
-        plt.xlabel('Star ID', fontsize=16)
-        plt.ylabel('Instrumental mag', fontsize=16)
-        plt.xticks(np.arange(0, N_stars, step=int(N_stars/10)))
-        plt.grid(ls=':')
-        plt.savefig(f_name[:-4]+'_AP_Annulus_result.png', overwrite=True)
-        #plt.show()
-        
-        #print and save result
-'''
